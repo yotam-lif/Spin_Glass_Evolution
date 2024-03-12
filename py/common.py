@@ -17,13 +17,12 @@ import matplotlib as mpl
 import seaborn as sns
 from numba import jit
 
-
 sns.set_style("white")
-mpl.rcParams['axes.grid']  = True
-mpl.rcParams['axes.grid.which']  = 'both'
-mpl.rcParams['xtick.minor.visible']  = True
-mpl.rcParams['ytick.minor.visible']  = True
-mpl.rcParams['xtick.minor.visible']  = True
+mpl.rcParams['axes.grid'] = True
+mpl.rcParams['axes.grid.which'] = 'both'
+mpl.rcParams['xtick.minor.visible'] = True
+mpl.rcParams['ytick.minor.visible'] = True
+mpl.rcParams['xtick.minor.visible'] = True
 mpl.rcParams['axes.facecolor'] = 'white'
 mpl.rcParams['grid.color'] = '0.8'
 mpl.rcParams['text.usetex'] = True
@@ -36,29 +35,29 @@ mpl.rcParams['figure.dpi'] = 125
 
 
 def make_mm_clonal_hist(
-        xlabel: str, 
-        ylabel: str, 
-        bin_centers: np.ndarray, 
+        xlabel: str,
+        ylabel: str,
+        bin_centers: np.ndarray,
         bin_widths: np.ndarray,
-        data: np.ndarray, 
-        output_folder: str, 
-        save_str: str, 
+        data: np.ndarray,
+        output_folder: str,
+        save_str: str,
         savefig: bool,
-        cmap_avgs, 
-        cmap_replicates, 
+        cmap_avgs,
+        cmap_replicates,
         log=False) -> None:
     """ Makes a histogram for visualizing the effects of multiple mutations, 
     clonal interference, and fixation probabilities. """
     replicate_means, replicate_sems \
-            = np.zeros_like(bin_centers), np.zeros_like(bin_centers)
+        = np.zeros_like(bin_centers), np.zeros_like(bin_centers)
     compute_bin_averaged_replicate_means(replicate_means, replicate_sems, data)
     nonzero_inds = replicate_means > 0
     fig, ax = plt.subplots()
-    ax.bar(bin_centers[nonzero_inds], replicate_means[nonzero_inds], 
-           bin_widths[nonzero_inds], yerr=replicate_sems[nonzero_inds], 
+    ax.bar(bin_centers[nonzero_inds], replicate_means[nonzero_inds],
+           bin_widths[nonzero_inds], yerr=replicate_sems[nonzero_inds],
            alpha=.8, color=cmap_avgs[1], linewidth=2, edgecolor='k')
     for replicate in range(data.shape[0]):
-        ax.scatter(bin_centers[nonzero_inds], 
+        ax.scatter(bin_centers[nonzero_inds],
                    data[replicate, :][nonzero_inds], marker='x',
                    color=cmap_replicates[replicate], alpha=0.4)
     ax.set_xlabel(xlabel)
@@ -68,15 +67,15 @@ def make_mm_clonal_hist(
     plt.tight_layout()
 
     if savefig:
-        plt.savefig("%s/%s.pdf" % (output_folder, save_str), dpi=300, 
+        plt.savefig("%s/%s.pdf" % (output_folder, save_str), dpi=300,
                     transparent=True)
 
 
 def merge_bins(
-        merge_bin_fac: int, 
-        bin_edges: np.ndarray, 
+        merge_bin_fac: int,
+        bin_edges: np.ndarray,
         bin_counts: np.ndarray,
-        outlier_num: int, 
+        outlier_num: int,
         merge_tail: bool) -> Tuple[np.ndarray, np.ndarray]:
     """ Merges merge_bin_fac bins in bin_edges and bin_counts to create 
     smaller bins. Preserves the left-most bin edge (minimum selection 
@@ -86,13 +85,13 @@ def merge_bins(
     If merge_tail is set to True, then we will merge the last outlier_num 
     bins into one and preserve all the others."""
 
-    if ((merge_bin_fac == 1) and merge_tail):
+    if (merge_bin_fac == 1) and merge_tail:
         bin_counts_retained = bin_counts[:, :-outlier_num]
         bin_edges_retained = bin_edges[:-outlier_num]
         bin_counts_final = np.sum(bin_counts[:, -outlier_num:], axis=1)
 
-        bin_counts_new = np.zeros((bin_counts_retained.shape[0], 
-                                  bin_counts_retained.shape[1] + 1))
+        bin_counts_new = np.zeros((bin_counts_retained.shape[0],
+                                   bin_counts_retained.shape[1] + 1))
         bin_counts_new[:, :-1] = bin_counts_retained
         bin_counts_new[:, -1] = bin_counts_final
 
@@ -107,7 +106,7 @@ def merge_bins(
 
     else:
         # preserve the min, max, and presence of zero. 
-        # otherwise, downsample the edges.
+        # otherwise, down sample the edges.
         new_bin_edges = [bin_edges[0]]
         merge_counter = 0
         for ii in range(bin_edges.size):
@@ -116,7 +115,7 @@ def merge_bins(
                 del new_bin_edges[-1]
                 new_bin_edges.append(bin_edges[ii])
                 merge_counter = 0
-            elif (merge_counter == merge_bin_fac):
+            elif merge_counter == merge_bin_fac:
                 new_bin_edges.append(bin_edges[ii])
                 merge_counter = 0
         new_bin_edges.append(bin_edges[-1])
@@ -124,11 +123,11 @@ def merge_bins(
 
         # because we preserve the min and max, the out-of-bounds counts 
         # are preserved as well.
-        new_bin_counts = np.zeros((bin_counts.shape[0], new_bin_edges.size-1))
+        new_bin_counts = np.zeros((bin_counts.shape[0], new_bin_edges.size - 1))
 
         # identify each old bin with its center, and find the index 
         # corresponding  to the new bin to update the new bin counts.
-        bin_centers = bin_edges[:-1] + (bin_edges[1:] - bin_edges[:-1])/2
+        bin_centers = bin_edges[:-1] + (bin_edges[1:] - bin_edges[:-1]) / 2
         for replicate in range(bin_counts.shape[0]):
             for ii, center in enumerate(bin_centers):
                 new_ind = get_bin_ind(center, new_bin_edges)
@@ -138,13 +137,13 @@ def merge_bins(
 
 
 def trim_bins(
-        bin_counts: np.ndarray, 
-        bin_edges: np.ndarray, 
-        merge_bin_fac: int, 
-        nexps: int, 
-        outlier_num: int, 
+        bin_counts: np.ndarray,
+        bin_edges: np.ndarray,
+        merge_bin_fac: int,
+        nexps: int,
+        outlier_num: int,
         merge_tail: bool,
-        drop_zeros: bool=True) -> Tuple[np.ndarray, np.ndarray]:
+        drop_zeros: bool = True) -> Tuple[np.ndarray, np.ndarray]:
     """ Process the bins coming out of lenski_sim.cc on a replicate basis.
     Throw out the out-of-bounds bins, remove any zero tails, and downsample 
     the bins.
@@ -157,75 +156,74 @@ def trim_bins(
     # throw out the zero tails
     if drop_zeros:
         min_ind = min([np.min(np.nonzero(bin_counts[replicate, :])) \
-                for replicate in range(nexps)])
+                       for replicate in range(nexps)])
         max_ind = max([np.max(np.nonzero(bin_counts[replicate, :])) \
-                for replicate in range(nexps)])
-        bin_counts = bin_counts[:, min_ind:max_ind+1]
+                       for replicate in range(nexps)])
+        bin_counts = bin_counts[:, min_ind:max_ind + 1]
 
         # normalize bin_edges to correspond to the new bin_counts
-        bin_edges = bin_edges[min_ind:max_ind+2]
+        bin_edges = bin_edges[min_ind:max_ind + 2]
 
     # perform any downsampling necessary as post-processing
-    bin_edges, bin_counts = merge_bins(merge_bin_fac, bin_edges, bin_counts, 
+    bin_edges, bin_counts = merge_bins(merge_bin_fac, bin_edges, bin_counts,
                                        outlier_num, merge_tail)
 
     return bin_edges, bin_counts
 
 
 def load_bins(
-        outer_folders: str, 
-        inner_folder: str, 
-        nexps: int, 
-        file_index: int=-1) -> Tuple[np.ndarray, np.ndarray]:
+        outer_folders: str,
+        inner_folder: str,
+        nexps: int,
+        file_index: int = -1) -> Tuple[np.ndarray, np.ndarray]:
     """ Returns the bin edges (consistent across all replicates) and the 
     bin counters for each experiment. """
     folder_name = "%s/%s/" % (outer_folders[0], inner_folder + str(0))
-    bin_edges = np.fromfile('%sbin_edges.dat.bin' % folder_name, 
+    bin_edges = np.fromfile('%sbin_edges.dat.bin' % folder_name,
                             dtype=np.float64)
-    bin_counts = np.zeros((nexps*len(outer_folders), bin_edges.size+1))
+    bin_counts = np.zeros((nexps * len(outer_folders), bin_edges.size + 1))
 
     for replicate in range(nexps):
         for outer_folder in outer_folders:
-            folder_name = "%s/%s/" % (outer_folder, \
-                    inner_folder + str(replicate))
+            folder_name = "%s/%s/" % (outer_folder, inner_folder + str(replicate))
 
             bin_counts_list \
-                    = glob.glob('%s%s' % (folder_name, 'bin_counts*'))
+                = glob.glob('%s%s' % (folder_name, 'bin_counts*'))
 
-            bin_counts_list.sort(key = lambda x: float(x.split('.')[-2]))
+            bin_counts_list.sort(key=lambda x: float(x.split('.')[-2]))
 
             bin_counts[replicate, :] \
-                    = np.fromfile(bin_counts_list[file_index], dtype=np.int32)
+                = np.fromfile(bin_counts_list[file_index], dtype=np.int32)
 
     return bin_edges, bin_counts
 
 
 def plot_bac_count_over_time(
-        max_nbacs: np.ndarray, 
-        times: np.ndarray, 
-        N0: float, 
-        curr_strain: int, 
-        skip: int, 
-        cmap_replicates: list, 
-        cmap_means: list, 
-        output_folder: str, 
+        max_nbacs: np.ndarray,
+        times: np.ndarray,
+        N0: float,
+        curr_strain: int,
+        skip: int,
+        cmap_replicates: list,
+        cmap_means: list,
+        output_folder: str,
         savefig: bool) -> None:
     """ Plots the bacteria count as a function of time of 
     the dominant few strains. """
     fig, ax = plt.subplots()
     for replicate in range(max_nbacs.shape[0]):
         output_inds = max_nbacs[replicate, :, curr_strain] >= 0
-        plt.plot(times, max_nbacs[replicate, :, curr_strain]/N0, 
+        plt.plot(times, max_nbacs[replicate, :, curr_strain] / N0,
                  color=cmap_replicates[replicate], alpha=0.25)
-    replicate_mean = np.mean(max_nbacs[:, :, curr_strain]/N0, axis=0)
-    replicate_sem = sem(max_nbacs[:, :, curr_strain]/N0, axis=0)
-    plt.errorbar(times[output_inds], replicate_mean[output_inds], 
-                 yerr=replicate_sem[output_inds], color=cmap_means[5], 
+    replicate_mean = np.mean(max_nbacs[:, :, curr_strain] / N0, axis=0)
+    replicate_sem = sem(max_nbacs[:, :, curr_strain] / N0, axis=0)
+    plt.errorbar(times[output_inds], replicate_mean[output_inds],
+                 yerr=replicate_sem[output_inds], color=cmap_means[5],
                  linewidth=2.5, alpha=1.0, errorevery=skip)
 
     plt.xlabel("day")
     plt.ylabel(r"$N_i/N_0$")
-    plt.title("bacteria count strain %d" % (curr_strain+1))
+    plt.title("bacteria count strain %d" % (curr_strain + 1))
     plt.tick_params(axis='both')
     ax.minorticks_on()
     plt.ticklabel_format(axis='x', style='sci', scilimits=(0, 0))
@@ -234,29 +232,29 @@ def plot_bac_count_over_time(
 
     if savefig:
         plt.savefig("%s/max_nbacs_strain%d.pdf" \
-                % (output_folder, curr_strain+1), dpi=300, transparent=True)
+                    % (output_folder, curr_strain + 1), dpi=300, transparent=True)
 
 
 def plot_mechanism_over_time(
-        nexps: int, 
-        mechanism_data: np.ndarray, 
-        times: np.ndarray, 
-        cmap_replicates: list, 
-        cmap_means: list, 
-        xlabel: str, 
-        ylabel: str, 
-        title: str, 
-        output_folder: str, 
-        save_title: str, 
-        savefig: bool, 
+        nexps: int,
+        mechanism_data: np.ndarray,
+        times: np.ndarray,
+        cmap_replicates: list,
+        cmap_means: list,
+        xlabel: str,
+        ylabel: str,
+        title: str,
+        output_folder: str,
+        save_title: str,
+        savefig: bool,
         skip: int) -> None:
     """ Constructs a mechanism plot over time (e.g. rank over time, fitness 
     increment over time, selection coefficient over time). """
     fig, ax = plt.subplots()
     for replicate in range(nexps):
         output_inds = mechanism_data[replicate, :] >= 0
-        plt.plot(times[output_inds], 
-                 mechanism_data[replicate, :][output_inds], 
+        plt.plot(times[output_inds],
+                 mechanism_data[replicate, :][output_inds],
                  color=cmap_replicates[replicate],
                  alpha=.80, linewidth=2.25)
     replicate_mean = np.mean(mechanism_data, axis=0)
@@ -264,7 +262,7 @@ def plot_mechanism_over_time(
     # plt.scatter(times[output_inds][::skip], replicate_mean[output_inds][::skip], color=cmap_replicates[7], marker='o', s=20,
     # plt.plot(times[output_inds][::skip], replicate_mean[output_inds][::skip], color=cmap_replicates[8], linewidth=3)
     # plt.errorbar(times[output_inds], replicate_mean[output_inds], yerr=replicate_sem[output_inds], marker='o', ms=0.5,
-                 # color=cmap_means[5], errorevery=skip, linewidth=3)
+    # color=cmap_means[5], errorevery=skip, linewidth=3)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(title)
@@ -275,22 +273,22 @@ def plot_mechanism_over_time(
     plt.tight_layout()
 
     if savefig:
-        plt.savefig("%s/%s.pdf" % (output_folder, save_title), 
+        plt.savefig("%s/%s.pdf" % (output_folder, save_title),
                     dpi=300, transparent=True)
 
 
 # @jit
 def get_rank_eff_and_select_info(
-        nexps: int, 
-        n_top_strains: int, 
-        L: int, 
-        mut_files: list, 
-        bac_files: list) -> Tuple[np.ndarray, 
-                                  np.ndarray, 
-                                  np.ndarray, 
-                                  np.ndarray, 
-                                  np.ndarray, 
-                                  np.ndarray]:
+        nexps: int,
+        n_top_strains: int,
+        L: int,
+        mut_files: list,
+        bac_files: list) -> Tuple[np.ndarray,
+np.ndarray,
+np.ndarray,
+np.ndarray,
+np.ndarray,
+np.ndarray]:
     """ Compute the mean rank, average beneficial fitness increment, and 
     average beneficial selection coefficient over time over all strains. 
     Do the same for the dominant few strains, and return the bacteria count 
@@ -323,7 +321,7 @@ def get_rank_eff_and_select_info(
     ntimes = max([len(mut_file_list) for mut_file_list in mut_files])
     mean_ranks = np.zeros((nexps, ntimes))
     mean_incs = np.zeros((nexps, ntimes))
-    mean_selects  = np.zeros((nexps, ntimes))
+    mean_selects = np.zeros((nexps, ntimes))
     max_ranks = np.zeros((nexps, ntimes, n_top_strains))
     max_incs = np.zeros((nexps, ntimes, n_top_strains))
     max_selects = np.zeros((nexps, ntimes, n_top_strains))
@@ -345,36 +343,36 @@ def get_rank_eff_and_select_info(
 
             # extract the rank and increment data from the mutation data
             ranks, incs = np.zeros_like(seps, dtype=np.float32), \
-                    np.zeros_like(seps, dtype=np.float32)
-            ranks[:-1] = mut_data[seps[1:] - 2]; ranks[-1] = mut_data[-2]
+                np.zeros_like(seps, dtype=np.float32)
+            ranks[:-1] = mut_data[seps[1:] - 2];
+            ranks[-1] = mut_data[-2]
             # ranks_test = np.concatenate((mut_data[seps[1:] - 2], np.array([mut_data[-2]])))
-            incs[:-1] = mut_data[seps[1:] - 1]; incs[-1] = mut_data[-1]
+            incs[:-1] = mut_data[seps[1:] - 1];
+            incs[-1] = mut_data[-1]
             # incs_test = np.concatenate((mut_data[seps[1:] - 1], np.array([mut_data[-1]])))
 
-
             # compute the mean statistics
-            mean_ranks[replicate, jj] = np.sum(nbac*ranks)/np.sum(nbac)
-            mean_incs[replicate, jj] = np.sum(nbac*incs)/np.sum(nbac)
-            mean_fit = np.sum(nbac*fits)/np.sum(nbac)
-            mean_selects[replicate, jj] = mean_incs[replicate, jj]/mean_fit
+            mean_ranks[replicate, jj] = np.sum(nbac * ranks) / np.sum(nbac)
+            mean_incs[replicate, jj] = np.sum(nbac * incs) / np.sum(nbac)
+            mean_fit = np.sum(nbac * fits) / np.sum(nbac)
+            mean_selects[replicate, jj] = mean_incs[replicate, jj] / mean_fit
 
             # compute the max statistics
             max_ranks[replicate, jj, :len(top_nbac_inds)] \
-                    = ranks[top_nbac_inds]
-            max_incs[replicate, jj, :len(top_nbac_inds)]  \
-                    = incs[top_nbac_inds]
+                = ranks[top_nbac_inds]
+            max_incs[replicate, jj, :len(top_nbac_inds)] \
+                = incs[top_nbac_inds]
             max_nbacs[replicate, jj, :len(top_nbac_inds)] \
-                    = nbac[top_nbac_inds]
+                = nbac[top_nbac_inds]
             max_selects[replicate, jj, :len(top_nbac_inds)] \
-                    = max_incs[replicate, jj, :len(top_nbac_inds)] \
-                    / fits[top_nbac_inds]
-
+                = max_incs[replicate, jj, :len(top_nbac_inds)] \
+                  / fits[top_nbac_inds]
 
         print('Finished finding rank, increment, and select info on \
-                experiment %d/%d' % (replicate+1, len(mut_files)))
+                experiment %d/%d' % (replicate + 1, len(mut_files)))
 
     return mean_ranks, mean_incs, mean_selects, max_ranks, \
-            max_incs, max_selects, max_nbacs
+        max_incs, max_selects, max_nbacs
 
 
 def get_n_mutants(
@@ -386,7 +384,7 @@ def get_n_mutants(
     n_mutants = np.zeros((nexps, ntimes))
     for curr_exp in range(nexps):
         n_mutants[curr_exp, :] = np.fromfile("%s/%s%d/nmuts.bin" \
-                % (data_folder, inner_folder, curr_exp), dtype=np.int32)
+                                             % (data_folder, inner_folder, curr_exp), dtype=np.int32)
 
     return n_mutants
 
@@ -409,15 +407,15 @@ def get_fit_data(
             nbac = bac_data[::2]
             fits = bac_data[1::2]
             # argsort sorts in ascending order - flip it around.
-            top_nbac_inds = np.argsort(nbac)[::-1][:n_top_strains] 
+            top_nbac_inds = np.argsort(nbac)[::-1][:n_top_strains]
 
             # average over bacteria, not strains.
-            mean_fits[replicate, jj] = np.sum(fits*nbac)/np.sum(nbac)  
+            mean_fits[replicate, jj] = np.sum(fits * nbac) / np.sum(nbac)
             max_fits[replicate, jj] = np.max(fits)
             dominant_fits[replicate, jj, :len(top_nbac_inds)] \
-                    = fits[top_nbac_inds]
+                = fits[top_nbac_inds]
         print("Finished loading fitness data on replicate %d/%d" \
-                % (replicate+1, len(bac_files)))
+              % (replicate + 1, len(bac_files)))
 
     return mean_fits, max_fits, dominant_fits
 
@@ -428,50 +426,50 @@ def load_Jijs(Jij_arr: np.ndarray, L: int):
     Jijs = np.zeros((L, L))
     n_elements = 0
     for row in range(L):
-        Jijs[row, row+1:] = Jij_arr[n_elements:n_elements + L-row-1]
-        n_elements += L-row-1
+        Jijs[row, row + 1:] = Jij_arr[n_elements:n_elements + L - row - 1]
+        n_elements += L - row - 1
     return Jijs + Jijs.T
 
 
 @jit
 def get_available_beneficial_mutations(
-        Jijs: np.ndarray, 
-        his: np.ndarray, 
+        Jijs: np.ndarray,
+        his: np.ndarray,
         spins: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """ Computes the distribution of beneficial mutations. Observe that we 
     do not use fast fitness computation for this - this is because numpy 
     indexing is faster in Python than a for loop + fast fitness computation. """
     Jspin = Jijs @ spins
-    dFs = -2*spins*(his + 2*Jspin)
+    dFs = -2 * spins * (his + 2 * Jspin)
     beneficial_inds = np.nonzero(dFs > 0)[0]
     return dFs, beneficial_inds
 
 
 @jit
 def compute_fitness_fast(
-        Jijs: np.ndarray, 
-        his: np.ndarray, 
-        mut_sites: set, 
+        Jijs: np.ndarray,
+        his: np.ndarray,
+        mut_sites: set,
         mut_ind: int,
-        Jinit: np.ndarray, 
-        init_spins: np.ndarray, 
+        Jinit: np.ndarray,
+        init_spins: np.ndarray,
         spins: np.ndarray) -> float:
     """ Performs the fast fitness computation algorithm. """
     Jcross = 0
     if len(mut_sites) > 0:
         existing_mut_inds = np.array(list(mut_sites))
         Jcross = Jijs[mut_ind, existing_mut_inds] \
-                @ init_spins[existing_mut_inds]
-    dF = -spins[mut_ind]*(2*his[mut_ind] + 4*Jinit[mut_ind] - 8*Jcross)
+                 @ init_spins[existing_mut_inds]
+    dF = -spins[mut_ind] * (2 * his[mut_ind] + 4 * Jinit[mut_ind] - 8 * Jcross)
     return dF
 
 
 # @jit
 def compute_asymptotic_fitness(
-        output_folder: str, 
-        inner_folder: str, 
-        nexps: int, 
-        L: int, 
+        output_folder: str,
+        inner_folder: str,
+        nexps: int,
+        L: int,
         beta: float):
     """ Compute a potential asymptotic fitness value by relaxing 
     the spin glass over time. """
@@ -480,15 +478,15 @@ def compute_asymptotic_fitness(
     for replicate in range(nexps):
         # load the magnetic fields
         his = np.fromfile("%s/%s%d/his.dat.bin" \
-                % (output_folder, inner_folder, replicate), dtype=np.float64)
+                          % (output_folder, inner_folder, replicate), dtype=np.float64)
         spins = np.loadtxt("%s/%s%d/alpha0s.dat" \
-                % (output_folder, inner_folder, replicate))
+                           % (output_folder, inner_folder, replicate))
 
         # check for epistasis
         try:
             Jij_arr = np.fromfile("%s/%s%d/Jijs.dat.bin" \
-                    % (output_folder, inner_folder, replicate), 
-                    dtype=np.float64)
+                                  % (output_folder, inner_folder, replicate),
+                                  dtype=np.float64)
             Jijs = load_Jijs(Jij_arr, L)
         except:
             print('Could not load Jijs!')
@@ -525,17 +523,17 @@ def compute_asymptotic_fitness(
                     # grab a random mutation, compute its fitness, 
                     # and accept with some probability.
                     mut_ind = np.random.randint(low=0, high=L)
-                    dF = compute_fitness_fast(Jijs, his, mut_sites, mut_ind, 
+                    dF = compute_fitness_fast(Jijs, his, mut_sites, mut_ind,
                                               Jinit, init_spins, spins)
-                    accept_prob = min([1, np.exp(beta*dF)])
+                    accept_prob = min([1, np.exp(beta * dF)])
                     flip_prob = np.random.uniform()
 
                 # hill climb, randomly selecting from the beneficial mutations
                 else:
                     dFs, beneficial_inds \
-                            = get_available_beneficial_mutations(Jijs, 
-                                                                 his, 
-                                                                 spins)
+                        = get_available_beneficial_mutations(Jijs,
+                                                             his,
+                                                             spins)
 
                     # randomly choose among the remaining beneficial mutations
                     if beneficial_inds.size > 0:
@@ -549,7 +547,7 @@ def compute_asymptotic_fitness(
                         print('Finished relaxation on replicate %d. \
                                 n_pos_accept: %d, n_neg_accept: %d, \
                                 fit: %g' % (replicate, n_pos_accepted, \
-                                n_neg_accepted, fit))
+                                            n_neg_accepted, fit))
 
                 # perform the acceptance/rejection step
                 if flip_prob < accept_prob:
@@ -567,18 +565,18 @@ def compute_asymptotic_fitness(
                         mut_sites.add(mut_ind)
 
                     if (nflips % 500) == 0:
-                        dFs, _ = get_available_beneficial_mutations(Jijs, 
-                                                                    his, 
+                        dFs, _ = get_available_beneficial_mutations(Jijs,
+                                                                    his,
                                                                     spins)
                         n_avail = np.sum(dFs > 0)
                         print('Data for replicate %d: fit: %g, n_avail %d, \
                                n_sites: %d, n_pos_accept: %d, \
                                n_neg_accept: %d' % (replicate, fit, n_avail, \
-                               len(mut_sites), n_pos_accepted, n_neg_accepted))
+                                                    len(mut_sites), n_pos_accepted, n_neg_accepted))
 
                         # switch to hill climbing regime when we 
                         # are sufficiently low
-                        if (n_avail < .01*L):
+                        if (n_avail < .01 * L):
                             hill_climb = True
 
                     nflips += 1
@@ -587,8 +585,8 @@ def compute_asymptotic_fitness(
 
 
 def compute_bin_averaged_replicate_means(
-        replicate_means: np.ndarray, 
-        replicate_sems: np.ndarray, 
+        replicate_means: np.ndarray,
+        replicate_sems: np.ndarray,
         bin_data: np.ndarray) -> None:
     """Compute bin-averaged replicate means, correctly ensuring we do not 
     average over replicates with zero values."""
@@ -596,39 +594,39 @@ def compute_bin_averaged_replicate_means(
         curr_dat = bin_data[:, ii]
         nonzero_dat = curr_dat[curr_dat > 0]
         replicate_means[ii] = 0 if nonzero_dat.size == 0 \
-                else np.mean(nonzero_dat)
+            else np.mean(nonzero_dat)
         replicate_sems[ii] = 0 \
-                if (nonzero_dat.size == 0 or nonzero_dat.size == 1) \
-                else sem(nonzero_dat)
+            if (nonzero_dat.size == 0 or nonzero_dat.size == 1) \
+            else sem(nonzero_dat)
 
 
 def make_binned_scatter_plot(
-        bin_centers: np.ndarray, 
-        data: list, 
-        xlabel: str, 
-        ylabel: str, 
-        ylim: list, 
-        output_folder: str, 
-        fig_title: str, 
-        savefig: bool, 
-        cmap, 
+        bin_centers: np.ndarray,
+        data: list,
+        xlabel: str,
+        ylabel: str,
+        ylim: list,
+        output_folder: str,
+        fig_title: str,
+        savefig: bool,
+        cmap,
         cmap_replicates) -> None:
     """ Make a scatter plot of data against bin_centers. """
     fig, ax = plt.subplots()
     replicate_means, replicate_sems \
-            = np.zeros_like(bin_centers), np.zeros_like(bin_centers)
+        = np.zeros_like(bin_centers), np.zeros_like(bin_centers)
     compute_bin_averaged_replicate_means(replicate_means, replicate_sems, data)
     nonzero_inds = replicate_means > 0
 
-    plt.scatter(bin_centers[nonzero_inds],  replicate_means[nonzero_inds], 
+    plt.scatter(bin_centers[nonzero_inds], replicate_means[nonzero_inds],
                 s=50, edgecolors=cmap[3], marker='o')
-    plt.errorbar(bin_centers[nonzero_inds], replicate_means[nonzero_inds], 
-                 yerr=replicate_sems[nonzero_inds], linestyle='None', 
+    plt.errorbar(bin_centers[nonzero_inds], replicate_means[nonzero_inds],
+                 yerr=replicate_sems[nonzero_inds], linestyle='None',
                  color=cmap[3])
 
     for replicate in range(data.shape[0]):
-        plt.scatter(bin_centers[nonzero_inds], 
-                    data[replicate, :][nonzero_inds], 
+        plt.scatter(bin_centers[nonzero_inds],
+                    data[replicate, :][nonzero_inds],
                     color=cmap_replicates[replicate],
                     marker='x', alpha=0.3)
 
@@ -639,23 +637,23 @@ def make_binned_scatter_plot(
     if (ylim[0] is not None) and (ylim[1] is not None):
         plt.ylim(ylim)
     else:
-        plt.ylim([ylim[0], np.max(data) + .1*np.max(data)])
+        plt.ylim([ylim[0], np.max(data) + .1 * np.max(data)])
 
     plt.tick_params(axis='both')
     ax.minorticks_on()
     ax.grid(True, which='both')
     plt.tight_layout()
     if savefig:
-        plt.savefig("%s/%s.pdf" % (output_folder, fig_title), 
+        plt.savefig("%s/%s.pdf" % (output_folder, fig_title),
                     dpi=300, transparent=True)
 
 
 def compute_avg_within_bins(
-        fits: list, 
-        bin_data: list, 
-        L: int, 
+        fits: list,
+        bin_data: list,
+        L: int,
         bin_edges: np.ndarray,
-        total_counters: np.ndarray, 
+        total_counters: np.ndarray,
         sum_counters: np.ndarray):
     """ Computes average data within each fitness bin for each replicate.
         Used for rank and average beneficial increment calculations.
@@ -691,42 +689,42 @@ def compute_avg_within_bins(
                 sum_counters[replicate, bin_ind] += data
 
             ind += 1
-            if (ind % int(curr_data.size/10) == 0):
+            if (ind % int(curr_data.size / 10) == 0):
                 print('Finished binning data %d/%d on replicate %d/%d' \
-                        % (ind, curr_data.size, replicate+1, len(bin_data)))
+                      % (ind, curr_data.size, replicate + 1, len(bin_data)))
 
     total_counters[total_counters == 0] = -1
     return sum_counters / total_counters
 
 
 def setup_replicate_bins(
-        data: list, 
-        nbins: int, 
+        data: list,
+        nbins: int,
         split_val: float):
     """ Bins the data for each replicate. """
     min_data = min([np.min(curr_data) for curr_data in data])
     max_data = max([np.max(curr_data) for curr_data in data])
     bin_edges, total_counters, sum_counters \
-            = setup_bins(min_data, max_data, nbins, split_val)
-    bin_widths  = bin_edges[1:] - bin_edges[:-1]
-    bin_centers = bin_widths/2  + bin_edges[:-1]
+        = setup_bins(min_data, max_data, nbins, split_val)
+    bin_widths = bin_edges[1:] - bin_edges[:-1]
+    bin_centers = bin_widths / 2 + bin_edges[:-1]
     replicate_total_counters = np.zeros((len(data), total_counters.size))
     replicate_sum_counters = np.zeros_like(replicate_total_counters)
 
     return bin_edges, replicate_total_counters, replicate_sum_counters, \
-            bin_widths, bin_centers
+        bin_widths, bin_centers
 
 
 def compute_rsq(input_data: np.ndarray, fit_data: np.ndarray) -> float:
     """ Computes the R^2 value for a nonlinear fit. """
     input_mean = np.mean(input_data)
-    SS_tot = np.sum((input_data - input_mean)**2)
-    SS_res = np.sum((fit_data - input_data)**2)
-    return 1 - SS_res/SS_tot
+    SS_tot = np.sum((input_data - input_mean) ** 2)
+    SS_res = np.sum((fit_data - input_data) ** 2)
+    return 1 - SS_res / SS_tot
 
 
 def get_current_muts_and_selects(
-        mut_data: np.ndarray, 
+        mut_data: np.ndarray,
         seps: np.ndarray) -> Tuple[list, list, dict]:
     """ Extracts the sequences of mutations and corresponding selection 
     coefficients from a given day's output of mutation data.
@@ -751,14 +749,14 @@ def get_current_muts_and_selects(
             end = end_ind(seps, jj)
             cdat = mut_data[seps[jj] + 1:end]
             curr_effs, final_eff = cdat[1:-1:2], cdat[-1]
-            select = final_eff/(1 + np.sum(curr_effs))
+            select = final_eff / (1 + np.sum(curr_effs))
             current_selects.append(select)
             current_muts.append(cdat[::2])
             sep_inds[len(current_muts) - 1] = jj
         except:
             print("Error: %s" % sys.exc_info()[1])
 
-    assert(len(current_muts) == len(current_selects))
+    assert (len(current_muts) == len(current_selects))
     return current_muts, current_selects, sep_inds
 
 
@@ -767,9 +765,9 @@ def get_bin_ind(select: float, bin_edges: np.ndarray) -> int:
 
 
 def setup_bins(
-        min_val: float, 
-        max_val: float, 
-        nbins: int, 
+        min_val: float,
+        max_val: float,
+        nbins: int,
         split_val=0) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ Constructs a set of bins over values 
     (selection coefficients, fitness, etc.)
@@ -782,7 +780,7 @@ def setup_bins(
     split_val:  Split the bins around split_val. i.e., 0 for 
     selection coefficients or 1 for fitness.
     """
-    bin_edges = np.linspace(min_val, max_val, nbins+1)
+    bin_edges = np.linspace(min_val, max_val, nbins + 1)
 
     # ensure that deleterious mutations are separated from beneficial 
     # mutations, or fitness > 1 is separated from fitness < 1
@@ -796,13 +794,13 @@ def setup_bins(
 
 def end_ind(seps: list, strain_ind: int):
     """ Computes the final index for a given mutation sequence. """
-    return -2 if (strain_ind == (seps.size-1)) else (seps[strain_ind + 1] - 2)
+    return -2 if (strain_ind == (seps.size - 1)) else (seps[strain_ind + 1] - 2)
 
 
 def get_files(
-        outer_folders: str, 
-        inner_folder: str, 
-        file_str: str, 
+        outer_folders: str,
+        inner_folder: str,
+        file_str: str,
         nexps: int) -> list:
     """Returns a list of files matching the glob regex expression file_str
     in sorted order by day."""
@@ -811,9 +809,9 @@ def get_files(
     for curr_exp in range(nexps):
         for outer_folder in outer_folders:
             folder_name = "%s/%s/" \
-                    % (outer_folder, inner_folder + str(curr_exp))
+                          % (outer_folder, inner_folder + str(curr_exp))
             file_list = glob.glob(folder_name + file_str)
-            file_list.sort(key = lambda x: float(x.split('.')[-2]))
+            file_list.sort(key=lambda x: float(x.split('.')[-2]))
             files.append(file_list)
             print("Finished loading file %d/%d" % (curr_exp + 1, nexps))
 
@@ -822,7 +820,7 @@ def get_files(
 
 @jit
 def get_ranks_and_avg_beneficial_incs(
-        mut_files: list, 
+        mut_files: list,
         L: int) -> Tuple[list, list]:
     """ Get the rank over time and average beneficial fitness increment 
     over time data for each replicate."""
@@ -835,18 +833,18 @@ def get_ranks_and_avg_beneficial_incs(
             data = np.fromfile(mut_file, dtype=np.float32)
             seps = np.argwhere(data > L).flatten()
             curr_ranks \
-                    = np.concatenate((data[seps[1:] - 2], np.array([data[-2]])))
+                = np.concatenate((data[seps[1:] - 2], np.array([data[-2]])))
             curr_avg_beneficial_incs \
-                    = np.concatenate((data[seps[1:] - 1], np.array([data[-1]])))
+                = np.concatenate((data[seps[1:] - 1], np.array([data[-1]])))
 
             # if np.all(curr_ranks > -L) and np.all(replicate_avg_beneficial_incs > -L):
             replicate_ranks = np.concatenate((replicate_ranks, curr_ranks))
             replicate_avg_beneficial_incs \
-                    = np.concatenate((replicate_avg_beneficial_incs, \
-                    curr_avg_beneficial_incs))
+                = np.concatenate((replicate_avg_beneficial_incs, \
+                                  curr_avg_beneficial_incs))
 
         print('Finished getting rank and fitness effect \
-                data on replicate %d/%d' % (replicate+1, len(mut_files)))
+                data on replicate %d/%d' % (replicate + 1, len(mut_files)))
         ranks.append(replicate_ranks)
         avg_beneficial_incs.append(replicate_avg_beneficial_incs)
 
@@ -862,17 +860,17 @@ def get_fits(bac_files: list, L: int) -> list:
             bac_dat = np.fromfile(bac_file, dtype=np.float32)
             curr_fits = np.concatenate((curr_fits, bac_dat[1::2]))
         print('Finished getting fitness data \
-                on replicate %d/%d' % (replicate+1, len(bac_files)))
+                on replicate %d/%d' % (replicate + 1, len(bac_files)))
         fits.append(curr_fits)
 
     return fits
 
 
 def get_fixed_mutations(
-        mut_files: list, 
-        L: int, 
-        calc_true_subst: bool=True, 
-        file_index: int=-1,
+        mut_files: list,
+        L: int,
+        calc_true_subst: bool = True,
+        file_index: int = -1,
         print_info=True) -> Tuple[list, list]:
     """ Finds all fixed mutations at output point corresponding to file_index.
 
@@ -898,9 +896,9 @@ def get_fixed_mutations(
     """
     # first find the minimum mutation sequence for each replicate, as all we need to do is
     # compare all substrings of the minimum sequence to all other mutation sequences.
-    min_seqs = [0]*len(mut_files)
-    min_lengths = [100*L]*len(mut_files)
-    min_seq_effs = [0]*len(mut_files)
+    min_seqs = [0] * len(mut_files)
+    min_lengths = [100 * L] * len(mut_files)
+    min_seq_effs = [0] * len(mut_files)
     for replicate, mut_list in enumerate(mut_files):
         mut_data = np.fromfile(mut_list[file_index], dtype=np.float32)
         seps = np.argwhere(mut_data > L).flatten()
@@ -915,7 +913,7 @@ def get_fixed_mutations(
 
         if print_info:
             print("Found the minimum sequence on \
-                    replicate %d/%d" % (replicate+1, len(mut_files)))
+                    replicate %d/%d" % (replicate + 1, len(mut_files)))
 
     # using the minimum sequences, check for fixed sequences
     selects, fixed_muts = [], []
@@ -955,16 +953,16 @@ def get_fixed_mutations(
             for ii in range(1, test_seq_length):
                 fixed_mut_byte_seq = min_seq[:ii].tobytes()
                 curr_fixed_muts.add(fixed_mut_byte_seq)
-                curr_select = min_seq_eff[ii]/(1 + np.sum(min_seq_eff[:ii-1]))
+                curr_select = min_seq_eff[ii] / (1 + np.sum(min_seq_eff[:ii - 1]))
                 curr_selects[fixed_mut_byte_seq] = curr_select
 
-            assert(len(curr_fixed_muts) <= min_length)
+            assert (len(curr_fixed_muts) <= min_length)
             fixed_muts.append(curr_fixed_muts)
             selects.append(curr_selects)
 
             if print_info:
                 print("Finished finding fixed mutations on \
-                        replicate %d/%d" % (replicate+1, len(mut_files)))
+                        replicate %d/%d" % (replicate + 1, len(mut_files)))
                 print("Number of fixed mutations: %d, \
                         min_length: %d" % (len(curr_fixed_muts), min_length))
     else:
@@ -974,10 +972,9 @@ def get_fixed_mutations(
             for ii in range(1, min_seq.size):
                 fixed_mut_byte_seq = min_seq[:ii].tobytes()
                 curr_fixed_muts.add(fixed_mut_byte_seq)
-                curr_select = min_seq_eff[ii]/(1 + np.sum(min_seq_eff[:ii-1]))
+                curr_select = min_seq_eff[ii] / (1 + np.sum(min_seq_eff[:ii - 1]))
                 curr_selects[fixed_mut_byte_seq] = curr_select
             fixed_muts.append(curr_fixed_muts)
             selects.append(curr_selects)
-
 
     return fixed_muts, selects

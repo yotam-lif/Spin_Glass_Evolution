@@ -47,7 +47,7 @@ lenski_sim::lenski_sim(
 
     /* Initialize the simulation parameters. */
     L(_L), N_0(_N_0), N_f(_N_f), p(_p*_L),
-    rho(_rho), sigh(_sigh), sigJ(_sigJ), Foff(0), base_folder(_base_folder), 
+    rho(_rho), sigh(_sigh), sigJ(_sigJ), Foff(0), base_folder(_base_folder),
     nbac_tot(_N_0), n_strains(1), interact(_interact), 
     output_interval(_output_interval), init_rank(_init_rank), 
     rank_interval(_rank_interval), bin_edges(new double[_nbins+1]), 
@@ -633,11 +633,12 @@ int lenski_sim::compute_rank(
 /* Compute DFE of given strain, & store all fitness deltas by gene index.. */
 void lenski_sim::compute_DFE(
         int strain_ind,
-        vector<vector<double>> &fit_deltas
+        vector<vector<double>> &fitness_deltas
         ) {
 
     // Clean vector.
-    fit_deltas[strain_ind].clear()
+    vector<double> &fds = fitness_deltas[strain_ind];
+    fds.clear();
 
     // Computes the hypothetical fitness of a mutant strain
     // used to determine fitness change.
@@ -664,9 +665,8 @@ void lenski_sim::compute_DFE(
                                        muts, alphak_p);
         // Compute the fitness delta and store it.
         fit_inc = curr_new_fit - fits[strain_ind];
-        fit_deltas.push_back(fit_inc);}
+        fds.push_back(fit_inc);}
     }
-}
 
 
 /* Update rank of the initial strain. */

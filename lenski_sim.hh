@@ -156,8 +156,8 @@ class lenski_sim {
         /* Compute DFE of certain strain */
         void compute_DFE(
                 int strain_ind,
-                vector<int> &fitness_deltas
-                )
+                vector<vector<double>> &fitness_deltas
+                );
 
         /* Update rank of the initial strain. */
         void update_rank();
