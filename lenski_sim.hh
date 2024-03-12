@@ -63,7 +63,7 @@ class lenski_sim {
                 const double _min_select = -.125,  
                 const double _max_select = .125, 
                 uint32_t _seed = 0,
-                const bool _hoc=true, 
+                const bool _hoc= false,
                 const int _replicate_number = 0, 
                 const bool _output_sim_info = true,
                 const int _reset_fac = 15);
@@ -152,6 +152,12 @@ class lenski_sim {
                 vector<int> &beneficial_muts, 
                 double &avg_fit_inc, 
                 bool store_incs);
+
+        /* Compute DFE of certain strain */
+        void compute_DFE(
+                int strain_ind,
+                vector<int> &fitness_deltas
+                )
 
         /* Update rank of the initial strain. */
         void update_rank();
@@ -278,6 +284,17 @@ class lenski_sim {
          * mutations[strain_ind][mutation_ind] has fitness effect
          * given by fit_effects[strain_ind][mutation_ind].*/
         vector<vector<double>> fit_effects;
+
+        /* Stores strain indexes of lineages we would like to follow their DFE.
+         * The meaning of this is that each time a strain mutates, we decide if we also start tracking
+         * The DFE of the new strain. In this way we create a "Tree", where we look at several DFEs over time as mutations
+         * Accumulate, in different lineages. */
+        unordered_set<int> lineages;
+
+        /* Stores the fitness deltas for all strains, which are 1st index.
+         * 2nd index is genomic index (spin index).
+         * fit_deltas[i][k] would be the fitness delta of flipping spin k in strain i. */
+        vector<vector<double>> fit_deltas;
 
         /* Stores the set {\alpha_i} for the original strain.
          * The vector mutations defined above is then 

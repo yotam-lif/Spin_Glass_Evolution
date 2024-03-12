@@ -87,7 +87,8 @@ lenski_sim::lenski_sim(
 /* Scale what is needed to vary the strength of epistasis. */
 void lenski_sim::scale_disorder(
         vector<double> unit_his, 
-        vector<double> unit_Jijs) {
+        vector<double> unit_Jijs
+        ){
 
     // update the disorder values
     for (int ii = 0; ii < L; ii++) { his[ii] = sigh*unit_his[ii]; }
@@ -123,7 +124,7 @@ void lenski_sim::scale_disorder(
 void lenski_sim::copy_disorder(
         vector<double> _his, 
         vector<double> _Jijs, 
-        vector<double> _alpha0s, 
+        vector<double> _alpha0s,
         vector<double> _Jalpha0) {
 
     his = _his;
@@ -277,7 +278,7 @@ void lenski_sim::step_forward(double dt) {
             curr_mut_order.push_back(mutant_ind);
             auto mut_exists_it = current_strains.find(curr_mut_order);
             if (mut_exists_it != current_strains.cend()) {  
-                n_bac[mut_exists_it->second]++;  
+                n_bac[mut_exists_it->second]++;
             }
             
             // otherwise, create a new strain
@@ -571,10 +572,11 @@ double lenski_sim::compute_fitness_hoc(
 
 /* Compute rank of a given strain, and store all the beneficial mutations. */
 int lenski_sim::compute_rank(
-        int strain_ind, 
-        vector<int> &beneficial_muts, 
-        double &avg_fit_inc, 
-        bool store_incs) {
+        int strain_ind,
+        vector<int> &beneficial_muts,
+        double &avg_fit_inc,
+        bool store_incs
+        ) {
     // Stores the rank of this strain.
     int curr_rank(0);          
 
@@ -626,6 +628,44 @@ int lenski_sim::compute_rank(
 
     avg_fit_inc /= (curr_rank > 0)? curr_rank : 1.;
     return curr_rank;
+}
+
+/* Compute DFE of given strain, & store all fitness deltas by gene index.. */
+void lenski_sim::compute_DFE(
+        int strain_ind,
+        vector<vector<double>> &fit_deltas
+        ) {
+
+    // Clean vector.
+    fit_deltas[strain_ind].clear()
+
+    // Computes the hypothetical fitness of a mutant strain
+    // used to determine fitness change.
+    double curr_new_fit(0);
+
+    // Locally declare.
+    unordered_set<int> muts;
+    muts = mutations[strain_ind];
+
+    // declare variables for fitness computation.
+    double fit_inc(0), alphak_p(0);
+
+    // Loop over all the genes and check the fitness
+    // if a mutation were to occur there.
+    for (int curr_gene = 0; curr_gene < L; curr_gene++) {
+        // Find if current gene has mutated from original strain.
+        auto mut_iterator = muts.find(curr_gene);
+        // If not, alphak_p is alpha0 (the original)
+        // otherwise -alpha0 (mutation is multiplication by -1).
+        alphak_p = (mut_iterator == muts.cend())?
+                   alpha0s[curr_gene] : -alpha0s[curr_gene];
+        // Compute fitness with point mutation in curr_gene
+        curr_new_fit = compute_fitness(strain_ind, curr_gene,
+                                       muts, alphak_p);
+        // Compute the fitness delta and store it.
+        fit_inc = curr_new_fit - fits[strain_ind];
+        fit_deltas.push_back(fit_inc);}
+    }
 }
 
 
