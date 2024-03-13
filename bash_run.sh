@@ -1,1 +1,1 @@
-bsub -q short -m cn1[12-38] -oo compile_out.txt -eo compile_err_out.txt "ml GSL/2.7-GCC-12.3.0 && ml Boost/1.82.0-GCC-12.3.0 && make"
+bsub -q short -m cn1[12-38] -oo compile_out.txt -eo compile_err_out.txt "module load GSL/2.7-GCC-12.3.0 && module load Boost/1.82.0-GCC-12.3.0 && make"
