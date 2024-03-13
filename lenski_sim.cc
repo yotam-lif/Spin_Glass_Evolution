@@ -633,11 +633,11 @@ int lenski_sim::compute_rank(
 /* Compute DFE of given strain, & store all fitness deltas by gene index.. */
 void lenski_sim::compute_DFE(
         int strain_ind,
-        vector<vector<double>> &fitness_deltas
+        vector<vector<float>> &fitness_deltas
         ) {
 
     // Clean vector.
-    vector<double> &fds = fitness_deltas[strain_ind];
+    vector<float> &fds = fitness_deltas[strain_ind];
     fds.clear();
 
     // Computes the hypothetical fitness of a mutant strain
