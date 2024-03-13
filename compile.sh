@@ -1,0 +1,1 @@
+bsub -q short -m cn1[12-38] -oo compile_out.txt -eo compile_err_out.txt "ml restore Evo && make"
