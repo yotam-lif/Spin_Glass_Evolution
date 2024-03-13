@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -fopenmp -g -Wno-long-long -lgsl -lgslcblas -Wall -lm -O3 -pedantic -std=c++17
+CXXFLAGS = -f openmp -g -Wno-long-long -lgsl -lgslcblas -Wall -lm -O3 -pedantic -std=c++17
 OBJS = lenski_sim.o
 EXECS = lenski_main lenski_vary_epi lenski_vary_clonal
 
