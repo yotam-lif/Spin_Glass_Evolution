@@ -1,4 +1,4 @@
-CXX = gcc-12.3
+CXX = gcc
 CXXFLAGS = -fopenmp -g -Wno-long-long -lgsl -lgslcblas -Wall -lm -O3 -pedantic -std=c++17
 OBJS = lenski_sim.o
 EXECS = lenski_main lenski_vary_epi lenski_vary_clonal
@@ -25,8 +25,7 @@ lenski_vary_clonal: lenski_vary_clonal.cc $(OBJS)
 	@echo Making $@ ...
 	$(CXX) -o $@ $^ $(CXXFLAGS)
 
-.PHONY: clean 
+.PHONY: clean
 
-clean: 
-	rm -f *.o
-	rm $(EXECS)
+clean:
+	rm -f *.o $(EXECS)
