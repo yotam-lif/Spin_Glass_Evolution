@@ -1,1 +1,1 @@
-bsub -q short -m cn1[12-38] -oo compile_out.txt -eo compile_err_out.txt compile_tasks.sh
+bsub -q short -m cn1[12-26] -oo compile_out.txt -eo compile_err_out.txt make
