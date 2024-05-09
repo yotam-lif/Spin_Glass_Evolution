@@ -50,30 +50,22 @@ void output_sim_info(
 // incorrect set of parameters.
 void syntax_message(int argc) {
     printf("\nGot %d arguments. Expected 16.\n", argc);
-	printf("Syntax: ./lenski_small L N_0 N_f ndays nexps dt p_val \
-            output_interval base_folder interact init_rank rank_fac \
-            rho beta delta HOC\n\n");
+	printf("Syntax: ./lenski_small L N_0 N_f ndays nexps dt p_val output_interval base_folder interact init_rank rank_fac rho beta delta HOC\n\n");
     printf("L: Size of genome. \n");
     printf("N_0: Initial number of bacteria. \n");
     printf("N_f: Number of bacteria at end of day. \n");
     printf("ndays: Number of days to simulate. \n");
-    printf("nexps: Number of experiments (individual simulations) \
-            to simulate.. \n");
+    printf("nexps: Number of experiments (individual simulations) to simulate.. \n");
     printf("dt: Timestep. \n");
-    printf("p_val: Value of p, input as mutation probability \
-            per division (p*L). \n");
-    printf("output_interval: Output data every output_interval \
-            number of days. \n");
-    printf("base_folder: Name of the folder containing replicate \
-            simulation data. \n");
-    printf("init_rank: Rank of the initial strain? -1 if you do not \
-            care, and want it to be random.\n");
+    printf("p_val: Value of p, input as mutation probability per division (p*L). \n");
+    printf("output_interval: Output data every output_interval number of days. \n");
+    printf("base_folder: Name of the folder containing replicate simulation data. \n");
+    printf("init_rank: Rank of the initial strain? -1 if you do not care, and want it to be random.\n");
     printf("rank_interval: Compute the rank every rank_interval days.\n");
     printf("rho: Density of interaction matrix. \n");
     printf("beta: epistatic contribution. \n");
     printf("delta: controls fitness effects of mutations. \n");
-    printf("HOC: Whether or not to use the house of cards at \
-            each genome model.\n");
+    printf("HOC: Whether or not to use the house of cards at each genome model.\n");
 	exit(1);
 }
 

@@ -66,7 +66,8 @@ class lenski_sim {
                 const bool _hoc= false,
                 const int _replicate_number = 0, 
                 const bool _output_sim_info = true,
-                const int _reset_fac = 15);
+                const int _reset_fac = 15,
+                const vector<int>& _sample_times = {0});
 
         /* Copy over what is needed to vary the strength of epistasis. */
         void scale_disorder(
@@ -150,14 +151,12 @@ class lenski_sim {
         int compute_rank(
                 int strain_ind, 
                 vector<int> &beneficial_muts, 
-                double &avg_fit_inc, 
+                double &avg_fit_inc,
                 bool store_incs);
 
         /* Compute DFE of certain strain */
         void compute_DFE(
-                int strain_ind,
-                vector<vector<float>> &fitness_deltas
-                );
+                int strain_ind);
 
         /* Update rank of the initial strain. */
         void update_rank();
@@ -167,6 +166,10 @@ class lenski_sim {
 
         /* Outputs mutation and rank information. */
         void output_mut_data_bin(string file_name);
+
+        /* @YADD */
+        /* Outputs tracked DFE information. */
+        void output_dfe_data_txt(string file_name);
 
         /* Outputs the h_i values. */
         void output_his_bin();
@@ -288,12 +291,14 @@ class lenski_sim {
         /* Stores strain indexes of lineages we would like to follow their DFE.
          * The meaning of this is that each time a strain mutates, we decide if we also start tracking
          * The DFE of the new strain. In this way we create a "Tree", where we look at several DFEs over time as mutations
-         * Accumulate, in different lineages. */
+         * accumulate, in different lineages. */
         unordered_set<int> lineages;
 
-        /* Stores the fitness deltas for all strains, which are 1st index.
-         * 2nd index is genomic index (spin index).
-         * fit_deltas[i][k] would be the fitness delta of flipping spin k in strain i. */
+        /* @YADD
+         * 1st index is tuple : 1st -> time of samples, 2nd -> vector of DFE samples.
+         * The vector of samples is tuple : 1st -> strain index , 2nd -> DFE vector
+         * DFE vector for strain i at index j is the fitness change of strain i with hypothetical mutation at gene j. */
+//        vector<std::tuple<time_t, vector<std::tuple<int, vector<double>>>>> fit_deltas;
         vector<vector<double>> fit_deltas;
 
         /* Stores the set {\alpha_i} for the original strain.
@@ -380,6 +385,11 @@ class lenski_sim {
         /* How many mutations before we perform the reset. */
         int reset_fac;
 
+        /* Time series that we sample DFEs */
+        vector<int> sample_times;
+
+        /* Indexes of strains we are tracking for DFE sampling */
+        vector<int> DFE_strain_indxs;
 };
 
 #endif

@@ -23,7 +23,7 @@ using std::set_difference;
 /* Class constructor. Initializes the simulation and sets 
  * the simulation parameters. */
 lenski_sim::lenski_sim(
-        const int _L,       
+        const int _L,
         const int _N_0, 
         const int _N_f,
         const double _p,    
@@ -43,7 +43,8 @@ lenski_sim::lenski_sim(
         const bool _hoc, 
         const int _replicate_number, 
         bool _output_sim_info,
-        const int _reset_fac) : 
+        const int _reset_fac,
+        const vector<int>& _sample_times) :
 
     /* Initialize the simulation parameters. */
     L(_L), N_0(_N_0), N_f(_N_f), p(_p*_L),
@@ -53,8 +54,8 @@ lenski_sim::lenski_sim(
     rank_interval(_rank_interval), bin_edges(new double[_nbins+1]), 
     bin_counters(new int[_nbins+2]), nbins(_nbins), 
     min_select(_min_select), max_select(_max_select), hoc(_hoc), 
-    replicate_number(_replicate_number), 
-    reset_index(1), reset_fac(_reset_fac)
+    replicate_number(_replicate_number),
+    reset_index(1), reset_fac(_reset_fac), sample_times(_sample_times), DFE_strain_indxs({0})
     
 
 
@@ -238,7 +239,6 @@ int lenski_sim::draw_poisson(double lambda) {
     return x;
 }
 
-
 /* Step the simulation forward by dt seconds. */
 void lenski_sim::step_forward(double dt) {
     // Change in number of bacteria for the current (looped over) strain.
@@ -246,10 +246,12 @@ void lenski_sim::step_forward(double dt) {
     // Number of mutations for the current (looped over) strain in the time dt.
     int n_mutants(0),     
         new_strains(0), // Number of new strains after mutations have occurred.
-        mutant_ind(0);  // Current index of the (looped over) mutation.
+        mutant_ind(0),  // Current index of the (looped over) mutation.
+        choice(0);      // Index of new mutant branch to track for DFE purpose.
     double new_fit(0), new_effect(0);
     double alphak_p(0);
     double poisson_mu(0);
+    vector<int> DFE_Tracking_Choices;
 
     // Compute the change in the number of cells for each strain, 
     // as well as the mutations that stem from each strain.
@@ -267,6 +269,10 @@ void lenski_sim::step_forward(double dt) {
         // adjust the current and the overall population
         n_bac[curr_strain] += (dN - n_mutants);
         nbac_tot += dN;
+
+        // Store indices of neutral / beneficial mutations
+        DFE_Tracking_Choices.clear();
+        DFE_Tracking_Choices.push_back(curr_strain);
 
         // for each mutant, flip the spin and join or define new strains.
         for (int curr_mutant = 0; curr_mutant < n_mutants; curr_mutant++) {
@@ -309,21 +315,41 @@ void lenski_sim::step_forward(double dt) {
                 // avoid excessive copying with std::move
                 mut_order.push_back(std::move(curr_mut_order));
                 mutations.push_back(std::move(curr_muts));
-                current_strains[curr_mut_order] = n_strains + new_strains;
+                int new_ind = n_strains + new_strains;
+                current_strains[curr_mut_order] = new_ind;
 
                 // store the fitness effect information
+                // fit_effects stores only the fitness effects of * mutations that actually happened *
                 auto curr_fit_effects = fit_effects[curr_strain];
                 new_effect = new_fit - fits[curr_strain];
                 curr_fit_effects.push_back(new_effect);
                 fit_effects.push_back(std::move(curr_fit_effects));
                 bin_counters[find_bin_ind(new_effect/fits[curr_strain])]++;
-
+                // @Y_ADD
+                // Store all beneficial / neutral mutations.
+                if (new_effect >= 0.0) {DFE_Tracking_Choices.push_back(new_ind);}
+                // @Y_FIN
                 // update strain counter and total number of bacteria
                 new_strains++; 
                 n_bac.push_back(1.0);
             }
         }
+        // @Y_ADD
+        // If we are tracking the current strain:
+        // choice is an int [0, n], n being the number of mutations with new_effect>=0 .
+        // n is number of elements in DFE_Tracking_Choices. n-1 branches + the current strain.
+        // Right now we use naive implementation and always track 1 strain lineage at any time for DFE.
+        if(std::find(DFE_strain_indxs.begin(), DFE_strain_indxs.end(), curr_strain) != DFE_strain_indxs.end()) {
+            choice = rand() % (DFE_Tracking_Choices.size());
+            DFE_strain_indxs = {DFE_Tracking_Choices[choice]};
+        }
+
     }
+    // Add the dominant strain always to the DFE tracking.
+    auto dom_itr = std::max_element(n_bac.begin(), n_bac.end());
+    int dom_ind = int(std::abs(std::distance(dom_itr, n_bac.begin())));
+    DFE_strain_indxs.push_back(dom_ind);
+    // @Y_FIN
     n_strains += new_strains;
 }
 
@@ -535,6 +561,8 @@ double lenski_sim::compute_fitness(
 
     else { J_cross_muts = 0; }
 
+    // ???? Should be:
+    // return fits[parent_index] - 2*alphak_p*(his[mutation_index] + Jalpha0[mutation_index] - 2*J_cross_muts);
     return fits[parent_index] - alphak_p*(2*his[mutation_index] 
             + 4*Jalpha0[mutation_index] - 8*J_cross_muts);
 }
@@ -630,42 +658,33 @@ int lenski_sim::compute_rank(
     return curr_rank;
 }
 
-/* Compute DFE of given strain, & store all fitness deltas by gene index.. */
+/* Compute DFE of given strain, & store all fitness deltas by gene index */
 void lenski_sim::compute_DFE(
-        int strain_ind,
-        vector<vector<float>> &fitness_deltas
+        int strain_ind
         ) {
 
-    // Clean vector.
-    vector<float> &fds = fitness_deltas[strain_ind];
-    fds.clear();
+    std::vector<double> fds;
+    unordered_set<int> muts = mutations[strain_ind];
+    double fit_delta(0), alphak_p(0), curr_new_fit(0);
+    double curr_old_fit = fits[strain_ind];
 
-    // Computes the hypothetical fitness of a mutant strain
-    // used to determine fitness change.
-    double curr_new_fit(0);
-
-    // Locally declare.
-    unordered_set<int> muts;
-    muts = mutations[strain_ind];
-
-    // declare variables for fitness computation.
-    double fit_inc(0), alphak_p(0);
-
-    // Loop over all the genes and check the fitness
-    // if a mutation were to occur there.
+    // Loop over all the genes and check the fitness if a mutation were to occur there.
     for (int curr_gene = 0; curr_gene < L; curr_gene++) {
         // Find if current gene has mutated from original strain.
         auto mut_iterator = muts.find(curr_gene);
-        // If not, alphak_p is alpha0 (the original)
-        // otherwise -alpha0 (mutation is multiplication by -1).
+        // If not, alphak_p is alpha0 (the original), otherwise -alpha0.
         alphak_p = (mut_iterator == muts.cend())?
                    alpha0s[curr_gene] : -alpha0s[curr_gene];
         // Compute fitness with point mutation in curr_gene
         curr_new_fit = compute_fitness(strain_ind, curr_gene,
                                        muts, alphak_p);
         // Compute the fitness delta and store it.
-        fit_inc = curr_new_fit - fits[strain_ind];
-        fds.push_back(fit_inc);}
+        fit_delta = curr_new_fit - curr_old_fit;
+        fds.push_back(fit_delta);
+        }
+    // Returning by value is fine, standard has optimization for NRVO.
+    // For now simplified version.
+    fit_deltas.push_back(fds);
     }
 
 
@@ -725,13 +744,20 @@ void lenski_sim::simulate_experiment(int n_days, double dt) {
     // simulate for a fixed number of generations/days.
     for (curr_day = 0; curr_day < n_days; curr_day++) {
         // keep stepping forward until we have reached the correct size.
-        time(&step_start);  
+        time(&step_start);
+
+        // Sample DFE at beginning of each day
+        for (int DFE_strain_indx : DFE_strain_indxs) {
+            compute_DFE(DFE_strain_indx);
+        }
+
         while (nbac_tot < N_f) { 
             hoc? step_forward_hoc(dt) : step_forward(dt);
         } 
 
         time(&step_end);
         step_time += difftime(step_end, step_start)/60.;
+
 
         // perform and time the dilution.
         time(&dilute_start); 
@@ -753,6 +779,7 @@ void lenski_sim::simulate_experiment(int n_days, double dt) {
     // Final dump of simulation data.
     output_bac_data_bin("bac_data");
     output_mut_data_bin("mut_data");
+    output_dfe_data_txt("dfe_data");
     output_bin_counts();
 
     // Output total time information.
@@ -966,7 +993,7 @@ void lenski_sim::output_bac_data_bin(string file_name) {
     string output_str = output_folder + "/" + file_name + ".%d.bin";
     sprintf(bufc, output_str.c_str(), curr_day);
     FILE *outf = fopen(bufc, "wb");
-    if (outf == NULL) { 
+    if (outf == nullptr) {
         fprintf(stderr, "Error opening file %s, errno %d, errstr (%s).\n", 
                 bufc, errno, strerror(errno)); 
     }
@@ -1069,10 +1096,10 @@ void lenski_sim::output_mut_data_bin(string file_name) {
 
     // write the distribution information to the file.
     if (curr_day % rank_interval == 0) {
-        string fname = output_folder + "/inc_dist." 
+        string fname = output_folder + "/inc_dist."
             + std::to_string(curr_day) + ".bin";
         FILE* outf = fopen(fname.c_str(), "wb");
-        if (outf == NULL) { 
+        if (outf == nullptr) {
             fprintf(stderr, "Error opening file %s, errno %d, errstr (%s).\n", 
                     fname.c_str(), errno, strerror(errno)); 
         }
@@ -1082,6 +1109,21 @@ void lenski_sim::output_mut_data_bin(string file_name) {
     }
 }
 
+// @YADD
+/* Output tracked DFE data as text*/
+void lenski_sim::output_dfe_data_txt(string file_name) {
+    printf("output_dfe_data_txt");
+    auto fds = fit_deltas;
+    string output_path = output_folder + "/" + file_name + ".txt";
+    std::ofstream outFile(output_path);
+    // Space (" ") separates different "sample draws" from DFE at given day
+    // "\n" separates frames/days
+    for (const auto& frame : fds) {
+        for (const auto& fd : frame) outFile << fd << " ";
+        outFile << "\n";
+    }
+    outFile.close();
+}
 
 /* Outputs the h_i values in binary. */
 void lenski_sim::output_his_bin() {
