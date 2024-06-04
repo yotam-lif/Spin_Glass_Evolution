@@ -19,7 +19,7 @@
 
 
 using boost::hash_range;
-using std::vector; 
+using std::vector;
 using std::map;
 using std::unordered_set;
 using std::unordered_map;
@@ -43,353 +43,348 @@ struct vector_hash {
 
 /* Master class for simulation of Lenski's LTEE. */
 class lenski_sim {
-    public:
-        /* Class constructor with sensible defaults provided by Yipei. */
-        lenski_sim(
-                const int _L = 4.6e8, 
-                const int _N_0 = 5e6, 
-                const int _N_f = 5e8,
-                const double _p = 8.9e-11, 
-                const double _rho = .05,
-                const double _sigh = 0,   
-                const double _muJ = 0, 
-                const double _sigJ = 0,
-                string _base_folder = "lenski_data", 
-                bool _interact = true, 
-                int _output_interval = 1, 
-                int _init_rank = -1, 
-                int _rank_interval = 1, 
-                const int _nbins = 250, 
-                const double _min_select = -.125,  
-                const double _max_select = .125, 
-                uint32_t _seed = 0,
-                const bool _hoc= false,
-                const int _replicate_number = 0, 
-                const bool _output_sim_info = true,
-                const int _reset_fac = 15,
-                const vector<int>& _sample_times = {0});
-
-        /* Copy over what is needed to vary the strength of epistasis. */
-        void scale_disorder(
-                vector<double> unit_his, 
-                vector<double> unit_Jijs);
-
-        /* Update the initial state. */
-        void copy_disorder(
-                vector<double> _his, 
-                vector<double> _Jijs, 
-                vector<double> _alpha0s, 
-                vector<double> _Jalpha0);
-
-        /* Set up the simulation environment. */
-        void allocate_space(
-                uint32_t seed, 
-                bool output_sim_info = true);
-
-        /* Draw the quenched disorder. */
-        void setup_disorder();
-
-        /* Draws a Poisson random number via inversion 
-         * by sequential search. */
-        int draw_poisson(double lambda);
-
-        /* Steps the simulation forward by dt seconds 
-         * in the 'small' setting. */
-        void step_forward(double dt);
-
-        /* Steps the simulation forward by dt seconds in 
-         * the house of cards setting. */
-        void step_forward_hoc(double dt);
-
-        /* Perform the dilution step with gsl random number generation. */
-        void dilute_gsl();
-
-        /* Run the whole simulation for n_days days with timestep dt, 
-         * using curr_exp to label the output folder. */
-        void simulate_experiment(
-                int n_days, 
-                double dt);
-
-
-        /* Re-compute the reference strain for faster fitness computation. */
-        void update_reference_strain();
-
-        /* Computes the fitness value for a new bacterial strain, 
-         * given the parent and the identification index for the mutation. 
-         * Does so for real-valued spins. Does not require the 
-         * initial strain to be all ones. */
-        inline double compute_fitness_hoc(
-                int parent_index, 
-                int mutation_index, 
-                double Delta_ck, 
-                unordered_map<int, double> &parent_muts);
-
-
-        /* Computes the fitness value for a new bacterial strain, 
-         * given the parent and the identification index for the mutation. 
-         * Does so for +-1 valued spins. Does not require the initial strain 
-         * to be all ones. */
-        inline double compute_fitness(
-                int parent_index, 
-                int mutation_index, 
-                unordered_set<int> &parent_muts, 
-                double alphak_p);
-
-
-        /* Computes the fitness using the full definition, for testing 
-         * other fitness computation methods. Used for +-1-valued spins. */
-        double compute_fitness_slow(int strain_index);
-
-        /* Compute the fitness using the local field formulation. */
-        double compute_fitness_lf(int parent_index, int mutation_index);
-
-        /* Computes the fitness using the full definition, for testing 
-         * other fitness computation methods. Used for real-valued spins. */
-        double compute_fitness_slow_hoc(int strain_index);
+public:
+    /* Class constructor with sensible defaults provided by Yipei. */
+    lenski_sim(
+            const int _L = 4.6e8,
+            const int _N_0 = 5e6,
+            const int _N_f = 5e8,
+            const double _p = 8.9e-11,
+            const double _rho = .05,
+            const double _sigh = 0,
+            const double _muJ = 0,
+            const double _sigJ = 0,
+            string _base_folder = "lenski_data",
+            bool _interact = true,
+            int _output_interval = 1,
+            int _init_rank = -1,
+            int _rank_interval = 1,
+            const int _nbins = 250,
+            const double _min_select = -.125,
+            const double _max_select = .125,
+            uint32_t _seed = 0,
+            const bool _hoc=true,
+            const int _replicate_number = 0,
+            const bool _output_sim_info = true,
+            const int _reset_fac = 15);
+
+    /* Copy over what is needed to vary the strength of epistasis. */
+    void scale_disorder(
+            vector<double> unit_his,
+            vector<double> unit_Jijs);
+
+    /* Update the initial state. */
+    void copy_disorder(
+            vector<double> _his,
+            vector<double> _Jijs,
+            vector<double> _alpha0s,
+            vector<double> _Jalpha0);
+
+    /* Set up the simulation environment. */
+    void allocate_space(
+            uint32_t seed,
+            bool output_sim_info = true);
+
+    /* Draw the quenched disorder. */
+    void setup_disorder();
+
+    /* Draws a Poisson random number via inversion
+     * by sequential search. */
+    int draw_poisson(double lambda);
+
+    /* Steps the simulation forward by dt seconds
+     * in the 'small' setting. */
+    void step_forward(double dt);
+
+    /* Steps the simulation forward by dt seconds in
+     * the house of cards setting. */
+    void step_forward_hoc(double dt);
+
+    /* Perform the dilution step with gsl random number generation. */
+    void dilute_gsl();
+
+    /* Run the whole simulation for n_days days with timestep dt,
+     * using curr_exp to label the output folder. */
+    void simulate_experiment(
+            int n_days,
+            double dt);
+
+
+    /* Re-compute the reference strain for faster fitness computation. */
+    void update_reference_strain();
+
+    /* Computes the fitness value for a new bacterial strain,
+     * given the parent and the identification index for the mutation.
+     * Does so for real-valued spins. Does not require the
+     * initial strain to be all ones. */
+    inline double compute_fitness_hoc(
+            int parent_index,
+            int mutation_index,
+            double Delta_ck,
+            unordered_map<int, double> &parent_muts);
+
+
+    /* Computes the fitness value for a new bacterial strain,
+     * given the parent and the identification index for the mutation.
+     * Does so for +-1 valued spins. Does not require the initial strain
+     * to be all ones. */
+    inline double compute_fitness(
+            int parent_index,
+            int mutation_index,
+            unordered_set<int> &parent_muts,
+            double alphak_p);
+
+
+    /* Computes the fitness using the full definition, for testing
+     * other fitness computation methods. Used for +-1-valued spins. */
+    double compute_fitness_slow(int strain_index);
+
+    /* Compute the fitness using the local field formulation. */
+    double compute_fitness_lf(int parent_index, int mutation_index);
+
+    /* Computes the fitness using the full definition, for testing
+     * other fitness computation methods. Used for real-valued spins. */
+    double compute_fitness_slow_hoc(int strain_index);
 
-        /* Compute rank of the inital strain. */
-        int compute_rank(
-                int strain_ind, 
-                vector<int> &beneficial_muts, 
-                double &avg_fit_inc,
-                bool store_incs);
+    /* Compute rank of the inital strain. */
+    int compute_rank(
+            int strain_ind,
+            vector<int> &beneficial_muts,
+            double &avg_fit_inc,
+            bool store_incs);
 
-        /* Compute DFE of certain strain */
-        void compute_DFE(
-                int strain_ind);
+    /* Update rank of the initial strain. */
+    void update_rank();
 
-        /* Update rank of the initial strain. */
-        void update_rank();
+    /* Outputs bacterial information. */
+    void output_bac_data_bin(string file_name);
 
-        /* Outputs bacterial information. */
-        void output_bac_data_bin(string file_name);
+    /* Outputs mutation and rank information. */
+    void output_mut_data_bin(string file_name);
 
-        /* Outputs mutation and rank information. */
-        void output_mut_data_bin(string file_name);
+    /* Outputs the h_i values. */
+    void output_his_bin();
 
-        /* @YADD */
-        /* Outputs tracked DFE information. */
-        void output_dfe_data_txt(string file_name);
+    /* Outputs the J_{ij} values. */
+    void output_Jijs_bin();
 
-        /* Outputs the h_i values. */
-        void output_his_bin();
+    /* Outputs the initial alpha_i values. */
+    void output_alpha0s();
 
-        /* Outputs the J_{ij} values. */
-        void output_Jijs_bin();
+    /* Outputs the J*\alpha information . */
+    void output_Jalpha_bin();
 
-        /* Outputs the initial alpha_i values. */
-        void output_alpha0s();
+    /* Outputs selection coefficient binning info. */
+    void output_bin_edges();
+    void output_bin_counts();
 
-        /* Outputs the J*\alpha information . */
-        void output_Jalpha_bin();
+    /* Wrapper function that outputs all relevant
+     * information each frame. */
+    void output_frame_info(
+            double &total_time,
+            time_t &frame_start,
+            time_t &frame_end,
+            double &rank_time,
+            double dilute_time,
+            double step_time,
+            int curr_frame,
+            int n_frames);
 
-        /* Outputs selection coefficient binning info. */
-        void output_bin_edges();
-        void output_bin_counts();
+    /* Checks for a strain with 0 bacteria. */
+    void check_nbac_wtf();
 
-        /* Wrapper function that outputs all relevant 
-         * information each frame. */
-        void output_frame_info(
-                double &total_time, 
-                time_t &frame_start, 
-                time_t &frame_end, 
-                double &rank_time, 
-                double dilute_time, 
-                double step_time, 
-                int curr_frame, 
-                int n_frames);
+    /* Checks the Jalpha0 vector. */
+    void check_Jalpha0();
 
-        /* Checks for a strain with 0 bacteria. */
-        void check_nbac_wtf();
+    /* Updates the Jalpha0 vector. */
+    void update_Jalpha0();
 
-        /* Checks the Jalpha0 vector. */
-        void check_Jalpha0();
+    /* Fills bin_edges with the correct values based on nbins,
+     * min_select, and max_select. */
+    void setup_bins();
 
-        /* Updates the Jalpha0 vector. */
-        void update_Jalpha0();
+    /* Finds the bin index for the given selection coefficient. */
+    int find_bin_ind(double select);
 
-        /* Fills bin_edges with the correct values based on nbins, 
-         * min_select, and max_select. */
-        void setup_bins();
+    /* Compute n_inits initializations for use when varying the mutation rate. */
+    vector<vector<double>> compute_alpha0s_and_Jalpha0s(int n_inits);
 
-        /* Finds the bin index for the given selection coefficient. */
-        int find_bin_ind(double select);
+    vector<double> get_alpha0s() { return alpha0s; }
+    vector<double> get_Jalpha0() { return Jalpha0; }
+    vector<double> get_his()     { return his;     }
+    vector<double> get_Jijs()    { return Jijs;    }
 
-        /* Compute n_inits initializations for use when varying the mutation rate. */
-        vector<vector<double>> compute_alpha0s_and_Jalpha0s(int n_inits);
+private:
+    /* Size of the E. Coli genome. */
+    const int L;
 
-        vector<double> get_alpha0s() { return alpha0s; }
-        vector<double> get_Jalpha0() { return Jalpha0; }
-        vector<double> get_his()     { return his;     }
-        vector<double> get_Jijs()    { return Jijs;    }
+    /* Number of bacteria at the start of every day. */
+    const int N_0;
 
-    private:
-        /* Size of the E. Coli genome. */
-        const int L;
+    /* Number of bacteria at the end of each day. */
+    const int N_f;
 
-        /* Number of bacteria at the start of every day. */
-        const int N_0;
+    /* Point mutation rate. */
+    const double p;
 
-        /* Number of bacteria at the end of each day. */
-        const int N_f;
+    /* Interaction parameter. */
+    const double rho;
 
-        /* Point mutation rate. */
-        const double p;
+    /* Standard deviation of the h_i distribution. */
+    const double sigh;
 
-        /* Interaction parameter. */
-        const double rho;
+    /* Standard deviation of the J distribution. */
+    const double sigJ;
 
-        /* Standard deviation of the h_i distribution. */
-        const double sigh;
+    /* Offset value for the small simulations. */
+    double Foff;
 
-        /* Standard deviation of the J distribution. */
-        const double sigJ;
+    /* Current simulation day. */
+    int curr_day;
 
-        /* Offset value for the small simulations. */
-        double Foff;
+    /* Current number of mutations that have occurred. */
+    int n_mutants_so_far;
 
-        /* Current simulation day. */
-        int curr_day;
+    /* Where to output the data. */
+    string base_folder;
+    string output_folder;
 
-        /* Current number of mutations that have occurred. */
-        int n_mutants_so_far;
+    /* Total current number of bacteria. */
+    double nbac_tot;
 
-        /* Where to output the data. */
-        string base_folder;
-        string output_folder;
+    /* Total current number of strains. */
+    int n_strains;
 
-        /* Total current number of bacteria. */
-        double nbac_tot;
+    /* Boolean indicating small simulations. */
+    int sim_case;
 
-        /* Total current number of strains. */
-        int n_strains;
+    /* Boolean indicating whether the J_{ij}
+     * terms are turned on. */
+    bool interact;
 
-        /* Boolean indicating small simulations. */
-        int sim_case;
+    /* Maps mutation indices to deviations from initial sequence.
+     * Indexed such that mutations[ii] contains all the active
+     * mutations for strain ii. Used for the HOC simulation. */
+    vector<unordered_map<int, double>> mutations_hoc;
 
-        /* Boolean indicating whether or not the J_{ij} 
-         * terms are turned on. */
-        bool interact;
+    /* Stores deviations from the initial sequence. */
+    vector<unordered_set<int>> mutations;
 
-        /* Maps mutation indices to deviations from initial sequence.
-         * Indexed such that mutations[ii] contains all the active 
-         * mutations for strain ii. Used for the HOC simulation. */
-        vector<unordered_map<int, double>> mutations_hoc;
+    /* Stores the orders of mutations. */
+    vector<vector<int>> mut_order;
 
-        /* Stores deviations from the initial sequence. */
-        vector<unordered_set<int>> mutations;
+    /* Stores the fitness effect for each mutation for each strain.
+     * Goes in line with mutations - i.e.,
+     * mutations[strain_ind][mutation_ind] has fitness effect
+     * given by fit_effects[strain_ind][mutation_ind].*/
+    vector<vector<double>> fit_effects;
 
-        /* Stores the orders of mutations. */
-        vector<vector<int>> mut_order;
+    /* Stores the set {\alpha_i} for the original strain.
+     * The vector mutations defined above is then
+     * relative to this vector. */
+    vector<double> alpha0s;
 
-        /* Stores the fitness effect for each mutation for each strain.
-         * Goes in line with mutations - i.e., 
-         * mutations[strain_ind][mutation_ind] has fitness effect
-         * given by fit_effects[strain_ind][mutation_ind].*/
-        vector<vector<double>> fit_effects;
+    /* Stores the rank of each strain. */
+    unordered_map<int, int> ranks;
 
-        /* Stores strain indexes of lineages we would like to follow their DFE.
-         * The meaning of this is that each time a strain mutates, we decide if we also start tracking
-         * The DFE of the new strain. In this way we create a "Tree", where we look at several DFEs over time as mutations
-         * accumulate, in different lineages. */
-        unordered_set<int> lineages;
+    /* Stores the distribution of beneficial fitness increments
+     * for the dominant strain. */
+    vector<double> beneficial_incs;
 
-        /* @YADD
-         * 1st index is tuple : 1st -> time of samples, 2nd -> vector of DFE samples.
-         * The vector of samples is tuple : 1st -> strain index , 2nd -> DFE vector
-         * DFE vector for strain i at index j is the fitness change of strain i with hypothetical mutation at gene j. */
-//        vector<std::tuple<time_t, vector<std::tuple<int, vector<double>>>>> fit_deltas;
-        vector<vector<double>> fit_deltas;
+    /* Stores the average fitness increments over the available
+     * beneficial mutations for each strain. */
+    unordered_map<int, double> avg_incs;
 
-        /* Stores the set {\alpha_i} for the original strain.
-         * The vector mutations defined above is then 
-         * relative to this vector. */
-        vector<double> alpha0s;
+    /* Maps a sequence of mutations to its index in other data structures.
+     * Used for checking if a given strain should merge with another. */
+    unordered_map<vector<int>, int, vector_hash> current_strains;
 
-        /* Stores the rank of each strain. */
-        unordered_map<int, int> ranks;
+    /* Stores the number of bacteria per species.
+     * Indexed such that n_bac[ii] is the number of
+     * mutations for strain ii. */
+    vector<double> n_bac;
 
-        /* Stores the distribution of beneficial fitness increments 
-         * for the dominant strain. */
-        vector<double> beneficial_incs;
+    /* Store the fitness value for each strain. Note this only
+     * needs to be updated on the fly.
+     * Indexed such that fits[ii] is the fitness for strain ii. */
+    vector<double> fits;
 
-        /* Stores the average fitness increments over the available 
-         * beneficial mutations for each strain. */
-        unordered_map<int, double> avg_incs;
+    /* Stores the values of h_i.
+     * Indexed such that his[i] = h_i. */
+    vector<double> his;
 
-        /* Maps a sequence of mutations to its index in other data structures.
-         * Used for checking if a given strain should merge with another. */
-        unordered_map<vector<int>, int, vector_hash> current_strains;
+    /* Stores the components of J*alpha0 */
+    vector<double> Jalpha0;
 
-        /* Stores the number of bacteria per species. 
-         * Indexed such that n_bac[ii] is the number of 
-         * mutations for strain ii. */
-        vector<double> n_bac;
+    /* J_{ij} values mapping i+L*j -> J_{ij}. */
+    vector<double> Jijs;
 
-        /* Store the fitness value for each strain. Note this only 
-         * needs to be updated on the fly. 
-         * Indexed such that fits[ii] is the fitness for strain ii. */
-        vector<double> fits;
+    /* Random number generator */
+    gsl_rng *gsl_gen;
 
-        /* Stores the values of h_i. 
-         * Indexed such that his[i] = h_i. */
-        vector<double> his;
+    /* How many days to wait before dumping data. */
+    int output_interval;
 
-        /* Stores the components of J*alpha0 */
-        vector<double> Jalpha0;
+    /* What the rank of the initial strain should be. */
+    int init_rank;
 
-        /* J_{ij} values mapping i+L*j -> J_{ij}. */
-        //unordered_map<int, double> Jijs;
-        vector<double> Jijs;
+    /* Number of days before we output the rank. */
+    int rank_interval;
 
-        /* Random number generator */
-        gsl_rng *gsl_gen;
+    /* Stores the edges of the bins for counting
+     * selection coefficients. */
+    double *bin_edges;
 
-        /* How many days to wait before dumping data. */
-        int output_interval;
+    /* Stores the number of selection coefficients in each bin. */
+    int *bin_counters;
 
-        /* What the rank of the initial strain should be. */
-        int init_rank;
+    /* Number of bins for storing selection coefficient counts. */
+    int nbins;
 
-        /* Number of days before we output the rank. */
-        int rank_interval;
+    /* Upper and lower bounds for the bins. */
+    double min_select;
+    double max_select;
 
-        /* Stores the edges of the bins for counting 
-         * selection coefficients. */
-        double *bin_edges;
+    /* Whether we do discrete simulation or house of cards simulation. */
+    bool hoc;
 
-        /* Stores the number of selection coefficients in each bin. */
-        int *bin_counters;
+    /* Which simulation this corresponds to. */
+    int replicate_number;
 
-        /* Number of bins for storing selection coefficient counts. */
-        int nbins;
+    /* Store the time it takes to compute the fitness. */
+    double fit_time;
+    double hash_time;
+    double rng_time;
 
-        /* Upper and lower bounds for the bins. */
-        double min_select;
-        double max_select;
+    /* How many times we have reset the dominant strain. */
+    int reset_index;
 
-        /* Whether we do discrete simulation or house of cards simulation. */
-        bool hoc;
+    /* How many mutations before we perform the reset. */
+    int reset_fac;
 
-        /* Which simulation this corresponds to. */
-        int replicate_number;
+    // * Yotam *
 
-        /* Store the time it takes to compute the fitness. */
-        double fit_time;
-        double hash_time;
-        double rng_time;
+    /* Outputs the following data used to process the DFE for different strains at different timestamps:
+     * 1. 'mut_times' - the companion vector to 'mut_order', which gives the day for each mutation in 'mut_order'.
+     * */
+    void output_dfe_data();
 
-        /* How many times we have reset the dominant strain. */
-        int reset_index;
-        
-        /* How many mutations before we perform the reset. */
-        int reset_fac;
+    /* Saves at the end of each day the mutation order vector of the dominant strain that day.
+     * For purposes of DFE, without changing Nicks code. */
+    vector<vector<int>> dom_mut_order;
 
-        /* Time series that we sample DFEs */
-        vector<int> sample_times;
+    /* Complimentary times to the mutations in 'mut_order'.
+     * For DFE reconstruction purposes. */
+    vector<vector<int>> mut_times;
 
-        /* Indexes of strains we are tracking for DFE sampling */
-        vector<int> DFE_strain_indxs;
+    /* Updates dom_mut_order. */
+    void update_dom_mut_order() {
+        auto dom_itr = std::max_element(n_bac.begin(), n_bac.end());
+        int dom_strain_ind = int(std::abs(std::distance(dom_itr, n_bac.begin())));
+        auto dom_strain_mut_order = mut_order[dom_strain_ind];
+        dom_mut_order.push_back(dom_strain_mut_order);
+    };
+
 };
 
 #endif
