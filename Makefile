@@ -1,31 +1,33 @@
 CXX = g++
-CXXFLAGS = -f openmp -g -Wno-long-long -lgsl -lgslcblas -Wall -lm -O3 -pedantic -std=c++17
+CXXFLAGS = -fopenmp -g -Wno-long-long -Wall -lm -pedantic -std=c++17
+CXXFLAGS += -O3
+
+# Use environment variables for include and library paths
+CXXFLAGS += -I$(BOOST_INCLUDE) -I$(GSL_INCLUDE)
+LDFLAGS = -L$(BOOST_LIB) -L$(GSL_LIB) -lgsl -lgslcblas
+
+# Object files and executables
 OBJS = lenski_sim.o
 EXECS = lenski_main lenski_vary_epi lenski_vary_clonal
 
-all: 
-	@echo Making executables: $(EXECS)
-	$(MAKE) executables
+# Default target
+all: $(EXECS)
 
-executables: $(OBJS) $(EXECS)
-
+# Pattern rule for object files
 %.o: %.cc %.hh
-	@echo Making $@ ...
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
+# Individual executable targets
 lenski_main: lenski_main.cc $(OBJS)
-	@echo Making $@ ...
-	$(CXX) -o $@ $^ $(CXXFLAGS)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 lenski_vary_epi: lenski_vary_epi.cc $(OBJS)
-	@echo Making $@ ...
-	$(CXX) -o $@ $^ $(CXXFLAGS)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 lenski_vary_clonal: lenski_vary_clonal.cc $(OBJS)
-	@echo Making $@ ...
-	$(CXX) -o $@ $^ $(CXXFLAGS)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
+# Phony target for cleanup
 .PHONY: clean
-
 clean:
 	rm -f *.o $(EXECS)
