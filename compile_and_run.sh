@@ -1,10 +1,12 @@
 #!/bin/bash
 
 # Load necessary modules
-module load Boost/1.82.0-GCC-12.3.0
-module load GSL/2.7-GCC-12.3.0
+echo "Loading modules..." >> out.txt 2>> err.txt
+module load Boost/1.82.0-GCC-12.3.0 >> out.txt 2>> err.txt
+module load GSL/2.7-GCC-12.3.0 >> out.txt 2>> err.txt
 
 # Export environment variables
+echo "Setting environment variables..." >> out.txt 2>> err.txt
 export BOOST_INCLUDE=/apps/easybd/easybuild/software/Boost/1.82.0-GCC-12.3.0/include
 export BOOST_LIB=/apps/easybd/easybuild/software/Boost/1.82.0-GCC-12.3.0/lib
 export GSL_INCLUDE=/apps/easybd/easybuild/software/GSL/2.7-GCC-12.3.0/include
@@ -12,15 +14,27 @@ export GSL_LIB=/apps/easybd/easybuild/software/GSL/2.7-GCC-12.3.0/lib
 export LD_LIBRARY_PATH=$GSL_LIB:$BOOST_LIB:$LD_LIBRARY_PATH
 
 # Print environment variables for debugging
-echo "BOOST_INCLUDE: $BOOST_INCLUDE"
-echo "BOOST_LIB: $BOOST_LIB"
-echo "GSL_INCLUDE: $GSL_INCLUDE"
-echo "GSL_LIB: $GSL_LIB"
-echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+echo "BOOST_INCLUDE: $BOOST_INCLUDE" >> out.txt 2>> err.txt
+echo "BOOST_LIB: $BOOST_LIB" >> out.txt 2>> err.txt
+echo "GSL_INCLUDE: $GSL_INCLUDE" >> out.txt 2>> err.txt
+echo "GSL_LIB: $GSL_LIB" >> out.txt 2>> err.txt
+echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH" >> out.txt 2>> err.txt
 
 # Clean and build the project
-make clean
-make
+echo "Running make clean..." >> out.txt 2>> err.txt
+make clean >> out.txt 2>> err.txt
+
+echo "Running make..." >> out.txt 2>> err.txt
+make >> out.txt 2>> err.txt
+
+# Check if the executable is created
+if [ ! -f "./lenski_main" ]; then
+    echo "Executable lenski_main not found!" >> err.txt
+    exit 1
+fi
+
+# Run the executable with arguments
+echo "Running lenski_main..." >> out.txt 2>> err.txt
 
 # Run the executable with arguments
 # L, N_0, N_f, ndays, nexps, dt, p_val (p*L prob per division), output_interval, base_folder, init_rank, rank_interval, rho, beta, delta, hoc
