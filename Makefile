@@ -30,4 +30,4 @@ lenski_vary_clonal: lenski_vary_clonal.cc $(OBJS)
 # Phony target for cleanup
 .PHONY: clean
 clean:
-	rm -f *.o $(EXECS) out_comp.txt error_comp.txt
+	rm -f *.o $(EXECS) out.txt err.txt
