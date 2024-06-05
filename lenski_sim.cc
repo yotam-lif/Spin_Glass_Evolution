@@ -1072,7 +1072,7 @@ void lenski_sim::output_dfe_data() {
         std::cerr << "Error opening file for writing: " << mut_times_path << std::endl;
         return;
     }
-    int dom(0); int mut(0); int mut_time(0);
+    int dom(0); int mut_time(0);
 
     // There are n_days lines, each one with the mut order of the dominant strain end of that day.
     for (auto strain_mut_order : dom_mut_order) {
