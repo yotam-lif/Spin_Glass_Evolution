@@ -90,10 +90,24 @@ def pull_env(n_replicate: int):
     J_path = os.path.join(base_dir, 'lenski_data', rep, 'Jijs.dat.bin')
     h_path = os.path.join(base_dir, 'lenski_data', rep, 'his.dat.bin')
     alpha0_path = os.path.join(base_dir, 'lenski_data', rep, 'alpha0s.dat')
+
+    # Debugging print statements
+    print(f"Pulling environment data for replicate {n_replicate}")
+    print(f"J_path: {J_path}")
+    print(f"h_path: {h_path}")
+    print(f"alpha0_path: {alpha0_path}")
+
     # Open and read
     Jijs = np.array(read_bin_to_type(J_path, 'd', float))
     his = np.array(read_bin_to_type(h_path, 'd', float))
     alpha0s = read_txt_file(alpha0_path)
+
+    # Additional debug print
+    if alpha0s is None:
+        print(f"Failed to read alpha0s.dat file at {alpha0_path}")
+    else:
+        print(f"alpha0s: {alpha0s}")
+
     alpha0s = np.array([float(x[0]) for x in alpha0s])
     return alpha0s, his, Jijs
 

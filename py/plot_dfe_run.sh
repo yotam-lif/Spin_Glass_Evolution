@@ -5,14 +5,26 @@ module load Python/3.10.8-GCCcore-12.2.0
 module load matplotlib/3.7.0-gfbf-2022b
 
 # Delete previous output files
-rm out_plot_dfe.txt err_plot_dfe.txt
+rm out_graph.txt err_graph.txt
 
 # Navigate to the script directory
 cd /home/labs/pilpel/yotamlif/Spin_Glass_Evolution/py
 
-# Print Python path for debugging
-echo "Python executable: $(which python)"
-echo "Python path: $(python -c 'import sys; print(sys.path)')"
+# Print environment and module information for debugging
+echo "Loaded modules:" > out_graph.txt
+module list >> out_graph.txt
+
+# Print Python executable and path for debugging
+echo "Python executable: $(which python)" >> out_graph.txt
+echo "Python version: $(python --version)" >> out_graph.txt
+echo "Python path: $(python -c 'import sys; print(sys.path)')" >> out_graph.txt
 
 # Run the Python script with arguments
-python plot_dfe.py 10 1 1e-3 5e-3 10000 20000 30000 40000 50000 60000 70000 80000 90000 99000
+python plot_dfe.py 10 1 1e-3 5e-3 0 100 200 300 400 500 600 700 800 900 990 >> out_graph.txt 2>> err_graph.txt
+
+# Check if the script ran successfully
+if [ $? -eq 0 ]; then
+  echo "Script ran successfully." >> out_graph.txt
+else
+  echo "Script encountered an error." >> out_graph.txt
+fi
