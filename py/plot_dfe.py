@@ -172,9 +172,12 @@ def pull_mut_hist(n_replicate: int):
         if mut_data[i] >= 10 * L:
             sep_is.append(i)
     mut_order = []
-    for j in range(len(sep_is)-1):
+    for j in range(len(sep_is)):
         start = sep_is[j] + 1
-        stop = sep_is[j + 1]
+        if j == len(sep_is) - 1:
+            stop = len(mut_data)
+        else:
+            stop = sep_is[j + 1]
         arr = mut_data[start:stop]
         # Now for each array in mut_data_split we want the even numbered items minus last one
         # First take out last two items
@@ -182,12 +185,6 @@ def pull_mut_hist(n_replicate: int):
         arr = arr[:-2]
         # Now add only even placed items
         mut_order.append(arr[::2])
-    # Last element
-    start = sep_is[-1] + 1
-    arr = mut_data[start:]
-    arr = arr[:-2]
-    mut_order.append(arr[::2])
-    # Done
     mut_times_path = os.path.join(ld_path, rep, "mut_times.dat")
     mut_times = read_txt_to_type(mut_times_path, int)
     dom_path = os.path.join(ld_path, rep, "dom_strain.dat")
