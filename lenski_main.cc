@@ -15,8 +15,9 @@ void output_sim_info(
         int N_f, 
         int ndays, 
         double dt, 
-        double mu, 
-        string base_folder, 
+        double mu,
+        double output_interval,
+        string base_folder,
         double rho, 
         double beta, 
         double delta, 
@@ -36,6 +37,7 @@ void output_sim_info(
     fprintf(outf, "ndays: %d\n", ndays);
     fprintf(outf, "dt: %g\n", dt);
     fprintf(outf, "mu: %g\n", mu);
+    fprintf(outf, "output_interval: %g\n", output_interval);
     fprintf(outf, "rho: %g\n", rho);
     fprintf(outf, "beta: %g\n", beta);
     fprintf(outf, "delta: %g\n", delta);
@@ -103,7 +105,7 @@ int main(int argc, char **argv) {
 
     // make the output directory and save simulation info
     mkdir(base_folder.c_str(), 0700);
-    output_sim_info(L, N_0, N_f, ndays, dt, p*L, base_folder, rho, 
+    output_sim_info(L, N_0, N_f, ndays, dt, p*L, output_interval, base_folder, rho,
                     beta, delta, init_rank, rank_interval, hoc);
 
     // draw seeds for the random number generators
