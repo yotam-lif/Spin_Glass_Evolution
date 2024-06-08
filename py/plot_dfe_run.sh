@@ -19,7 +19,7 @@ echo "Python executable: $(which python)" >> out_graph.txt
 echo "Python version: $(python --version)" >> out_graph.txt
 echo "Python path: $(python -c 'import sys; print(sys.path)')" >> out_graph.txt
 
-# Run the Python script with arguments
+# Run the Python script with arguments nexps, nsamples, pos_res, neg_res, [times]
 python plot_dfe.py 10 1 1e-3 5e-3 0 100 200 300 400 500 600 700 800 900 990 >> out_graph.txt 2>> err_graph.txt
 
 # Check if the script ran successfully
