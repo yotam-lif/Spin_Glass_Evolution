@@ -91,12 +91,6 @@ def pull_env(n_replicate: int):
     h_path = os.path.join(base_dir, 'lenski_data', rep, 'his.dat.bin')
     alpha0_path = os.path.join(base_dir, 'lenski_data', rep, 'alpha0s.dat')
 
-    # Debugging print statements
-    print(f"Pulling environment data for replicate {n_replicate}")
-    print(f"J_path: {J_path}")
-    print(f"h_path: {h_path}")
-    print(f"alpha0_path: {alpha0_path}")
-
     # Open and read
     Jijs = np.array(read_bin_to_type(J_path, 'd', float))
     his = np.array(read_bin_to_type(h_path, 'd', float))
@@ -134,12 +128,9 @@ def pull_bac_data(n_replicate: int):
     f_sim = open(sim_path, 'rt')
     sim_dat = f_sim.read().splitlines()
     # Output_interval is 6th item
-    output_interval = int(sim_dat[6].split(": ", 2)[-1])
     n_days = int(sim_dat[3].split(": ", 2)[-1])
-    L = int(sim_dat[0].split(": ", 2)[-1])
-    last_frame = int(n_days / output_interval)
     # Now get the actual bac data
-    bac_end = "bac_data." + str(last_frame) + ".bin"
+    bac_end = "bac_data." + str(n_days) + ".bin"
     bac_data_path = os.path.join(ld_path, rep, bac_end)
     bac_data = read_bin_to_type(bac_data_path, 'f', float)
     # The data is structured in the following way:
@@ -163,12 +154,10 @@ def pull_mut_hist(n_replicate: int):
     f_sim = open(sim_path, 'rt')
     sim_dat = f_sim.read().splitlines()
     # Output_interval is 6th item
-    output_interval = int(sim_dat[6].split(": ", 2)[-1])
     n_days = int(sim_dat[3].split(": ", 2)[-1])
     L = int(sim_dat[0].split(": ", 2)[-1])
-    last_frame = int(n_days / output_interval)
     # Now get the actual mutant data
-    mut_end = "mut_data." + str(last_frame) + ".bin"
+    mut_end = "mut_data." + str(n_days) + ".bin"
     mut_data_path = os.path.join(ld_path, rep, mut_end)
     mut_data = read_bin_to_type(mut_data_path, 'f', int)
     # The data is structured in the following way:
