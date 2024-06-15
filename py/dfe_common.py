@@ -132,6 +132,46 @@ def pull_bac_data(n_replicate: int):
     return bac_data[::2]
 
 
+def separate_mut_data(mut_data: list, L: int):
+    """
+    Separates the mutation data into individual strain data.
+
+    Args:
+        mut_data (list): The mutation data.
+        L (int): The length of the genome.
+
+    Returns:
+        list: List of separated mutation data.
+    """
+    # The data is structured in the following way:
+    #  for (0 < i < n_strains):
+    #       data.push(10*L + i + 1) - as a distinct seperator
+    #       * Now for each mutation in history of strain i: *
+    #       for (0 < j < mut_order[i].size()):
+    #           * Push site, fitness effect *
+    #           data.push(mut_order[i][j])
+    #           data.push(fitness effect of mut_order[i][j])
+    #       * Push, if time for rank calc, rank, average fitness increment *
+    #       * Otherwise push -L, -L as placeholders *
+    #       data.push(rank of strain i at time of frame \ -L as placeholder if not time to compute rank)
+    #       data.push(average fitness increment of strain i at time of frame \ -L ... )
+    #
+    # Now split first by separators
+    sep_is = []
+    res = []
+    for i in range(len(mut_data)):
+        if mut_data[i] >= 10 * L:
+            sep_is.append(i)
+    for j in range(len(sep_is)):
+        start = sep_is[j] + 1
+        if j == len(sep_is) - 1:
+            stop = len(mut_data)
+        else:
+            stop = sep_is[j + 1]
+        res.append(mut_data[start:stop])
+    return res
+
+
 def pull_mut_hist(n_replicate: int):
     # Determine the path to the current script
     current_script_path = os.path.abspath(__file__)
@@ -151,34 +191,12 @@ def pull_mut_hist(n_replicate: int):
     mut_end = "mut_data." + str(n_days) + ".bin"
     mut_data_path = os.path.join(ld_path, rep, mut_end)
     mut_data = read_bin_to_type(mut_data_path, 'f', int)
-    # The data is structured in the following way:
-    #  for (0 < i < n_strains):
-    #       data.push(10*L + i + 1) - as a distinct seperator
-    #       for (0 < j < mut_order[i].size()):
-    #           data.push(mut_order[i][j])
-    #           data.push(fitness effect of mut_order[i][j])
-    #       data.push(rank of strain i at time of frame \ -L as placeholder if not time to compute rank)
-    #       data.push(average fitness increment of strain i at time of frame \ -L ... )
-    #
-    # Now split first by separators
-    sep_is = []
-    for i in range(len(mut_data)):
-        if mut_data[i] >= 10 * L:
-            sep_is.append(i)
-    mut_order = []
-    for j in range(len(sep_is)):
-        start = sep_is[j] + 1
-        if j == len(sep_is) - 1:
-            stop = len(mut_data)
-        else:
-            stop = sep_is[j + 1]
-        arr = mut_data[start:stop]
-        # Now for each array in mut_data_split we want the even numbered items minus last one
-        # First take out last two items
-        # TODO: Fix this somehow
-        arr = arr[:-2]
-        # Now add only even placed items
-        mut_order.append(arr[::2])
+    mut_order = separate_mut_data(mut_data, L)
+    # Now for each array in mut_order we want the even numbered items minus last one
+    # First take out last two items
+    mut_order = [arr[:-2] for arr in mut_order]
+    # Now add only even placed items
+    mut_order = [arr[::2] for arr in mut_order]
     mut_times_path = os.path.join(ld_path, rep, "mut_times.dat")
     mut_times = read_txt_to_type(mut_times_path, int)
     dom_path = os.path.join(ld_path, rep, "dom_strain.dat")
@@ -360,3 +378,65 @@ def remove_n_largest(data: list, n: int):
         max_val = max(res, key=abs)
         res.remove(max_val)
     return res
+
+
+def pull_ranks(n_replicate: int):
+    """
+    Pulls the ranks for a specific replicate.
+
+    Args:
+        n_replicate (int): The replicate number.
+
+    Returns:
+        list: List of ranks.
+    """
+    # Determine the path to the current script
+    current_script_path = os.path.abspath(__file__)
+    # Determine the base directory of the script
+    base_dir = os.path.dirname(os.path.dirname(current_script_path))
+    # Construct the relative paths
+    ld_path = os.path.join(base_dir, 'lenski_data')
+    # Open & read Sim_data
+    rep = "replicate" + str(n_replicate)
+    sim_dat = read_sim_data()
+    # Get sim data
+    n_days = int(sim_dat['n_days'])
+    L = int(sim_dat['L'])
+    output_interval = int(sim_dat['output_interval'])
+    rank_interval = int(sim_dat['rank_interval'])
+    # Iterate over mutant data outputs
+    ranks = []
+    for i in range(0, n_days, output_interval):
+        f_name = f"mut_data.{i}.bin"
+        mut_data_path = os.path.join(ld_path, rep, f_name)
+        mut_data = read_bin_to_type(mut_data_path, 'f', int)
+        mut_order = separate_mut_data(mut_data, L)
+        if i % rank_interval:
+            # We want rank data, which is the element before last in each array
+            ranks.append([arr[-2] for arr in mut_order])
+    rank_times = list(range(0, n_days, rank_interval))
+    return ranks, rank_times
+
+
+def read_sim_data():
+    """
+    Reads a simulation data file and returns a dictionary with the parameters.
+
+    :return: dict, dictionary with the parameters
+    """
+    # Determine the path to the current script
+    current_script_path = os.path.abspath(__file__)
+    # Determine the base directory of the script
+    base_dir = os.path.dirname(os.path.dirname(current_script_path))
+    # Construct the relative paths
+    ld_path = os.path.join(base_dir, 'lenski_data')
+    # Open & read Sim_data
+    file_path = os.path.join(ld_path, 'sim_data.txt')
+    sim_data = {}
+    with open(file_path, 'r') as file:
+        for line in file:
+            if ':' in line:
+                key, val = line.split(':', 1)
+                sim_data[key.strip()] = val.strip()
+
+    return sim_data
