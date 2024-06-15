@@ -314,18 +314,6 @@ void lenski_sim::step_forward(double dt) {
                 current_strains[curr_mut_order] = n_strains + new_strains;
 
                 // @Yotam
-
-                // Update linked_mut_times & linked_mut_order for dfe purposes.
-                // Important to create nodes on the heap.
-//                std::shared_ptr<MutationNode> new_mut_node = std::make_shared<MutationNode>(mutant_ind, curr_day);
-//                // Copy parent list
-//                MutationLinkedList new_list = linked_mut_hist[curr_strain].copy();
-//                // add the new mutation to the parent list to create child list
-//                new_list.push_back(new_mut_node);
-//                // Now add the child list to the linked_mut_history
-//                linked_mut_hist.push_back(new_list);
-
-                // @Yotam
                 vector<int> curr_mut_times = mut_times[curr_strain];
                 curr_mut_times.push_back(curr_day);
                 mut_times.push_back(std::move(curr_mut_times));
