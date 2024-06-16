@@ -34,10 +34,8 @@ if __name__ == '__main__':
         alpha0s, his, Jijs = dfe.pull_env(i)
         Jijs = dfe.load_Jijs(Jijs, alpha0s.size)
         mut_order, mut_times, dom_strain_mut_order = dfe.pull_mut_hist(i)
-        ranks, rank_times = dfe.pull_ranks(i)
         # dfes will hold the dfe data
         dfes = []
-
         # Calculate the DFE for the dominant strain at given days
         dfes_dom = []
         for t in times:
@@ -46,12 +44,14 @@ if __name__ == '__main__':
             dfe_t = dfe.compute_dfe(alpha, his, Jijs)
             dfes_dom.append(dfe_t)
         dfes.append(dfes_dom)
-
         # Add strains we chose to track lineages for
         bac_data = dfe.pull_bac_data(i)
+        # enum_pops is a list of tuples (strain, bac_data[strain]) sorted by bac_data[strain]
+        # For purposes of plotting dominant strains first
         enum_pops = sorted(enumerate(bac_data), key=lambda x: x[1], reverse=True)
+        # We will only plot the DFE for the first n_samples strains
         n = min(args.n_samples, len(bac_data))
-
+        # Calculate the DFE for the strains we chose to track lineages for
         for j in range(n):
             dfes_strain = []
             strain, _ = enum_pops[j]
@@ -61,7 +61,6 @@ if __name__ == '__main__':
                 dfe_t = dfe.compute_dfe(alpha, his, Jijs)
                 dfes_strain.append(dfe_t)
             dfes.append(dfes_strain)
-
         # The first element in dfes is the "dominant strain" DFE
         rep = f"replicate{i}"
         for j, dfe_strain_j in enumerate(dfes):
@@ -70,43 +69,37 @@ if __name__ == '__main__':
             os.makedirs(strain_dir, exist_ok=True)
 
             for k, dfe_t in enumerate(dfe_strain_j):
+                # dfe_strain_j[k] is the DFE for strain j at day k
                 t = times[k]
-
                 # Create a histogram for each dfe_t
                 plt.hist(dfe_t, bins=args.n_bins, density=True, label='Raw Data')
-
                 # Fit a KDE to the histogram data
                 kde = gaussian_kde(dfe_t, bw_method='silverman')
                 x = np.linspace(min(dfe_t), max(dfe_t), 1000)
                 kde_values = kde(x)
-
                 # Fit KDE data to stable distribution with initial guesses
                 initial_guess = [1.5, -1.0, -0.01, 0.005]
                 params, _ = curve_fit(stable_pdf, x, kde_values, p0=initial_guess, bounds=((0, -1, -np.inf, 0), (2, 1, np.inf, np.inf)))
-
                 # Extract fitted parameters
                 alpha, beta, loc, scale = params
-
                 # Calculate fitted stable distribution values
                 fitted_stable_values = stable_pdf(x, alpha, beta, loc, scale)
-
                 # Plot KDE
                 plt.plot(x, kde_values, label='KDE')
-
                 # Plot fitted stable distribution
                 plt.plot(x, fitted_stable_values, linestyle='--', label='Fitted stable distribution')
-                title = f"strain number: {strain}, day: {t}"
-                # if t in rank_times:
-                #     ind = rank_times.index(t)
-                #     title += f", rank: {ranks[ind]}"
+                # Calculate rank
+                strain_ind = enum_pops[j][0]
+                mut_order_strain_t = dfe.build_mut_series_t(mut_order[strain_ind], mut_times[strain_ind], t)
+                alpha_t = dfe.build_alpha(alpha0s, mut_order_strain_t)
+                rank = dfe.compute_rank(alpha_t, his, Jijs)
+                # Plot
                 plt.legend()
-                plt.title(title)
+                plt.title(f"strain number: {strain}, day: {t}, rank: {rank}")
                 plt.xlabel('Fitness effect')
                 plt.ylabel('Frequency')
-
                 # Save the plot in the strain's directory
                 plt.savefig(os.path.join(strain_dir, f"dfe_day_{t}.png"))
                 plt.close()
-
                 # Print the fitted parameters
                 print(f"Fitted stable distribution parameters for {strain}, day {t}: alpha={alpha}, beta={beta}, loc={loc}, scale={scale}")

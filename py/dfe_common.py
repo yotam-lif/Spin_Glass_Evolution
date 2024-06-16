@@ -181,12 +181,10 @@ def pull_mut_hist(n_replicate: int):
     ld_path = os.path.join(base_dir, 'lenski_data')
     # Open & read Sim_data
     rep = "replicate" + str(n_replicate)
-    sim_path = os.path.join(ld_path, 'sim_data.txt')
-    f_sim = open(sim_path, 'rt')
-    sim_dat = f_sim.read().splitlines()
+    sim_dat = read_sim_data()
     # Output_interval is 6th item
-    n_days = int(sim_dat[3].split(": ", 2)[-1])
-    L = int(sim_dat[0].split(": ", 2)[-1])
+    n_days = int(sim_dat['ndays'])
+    L = int(sim_dat['L'])
     # Now get the actual mutant data
     mut_end = "mut_data." + str(n_days) + ".bin"
     mut_data_path = os.path.join(ld_path, rep, mut_end)
@@ -221,6 +219,11 @@ def load_Jijs(Jij_arr: np.ndarray, L: int):
     # Index for traversing the Jij_arr
     n_elements = 0
 
+    # If beta == 0 then Jijs is just a matrix of zeros
+    sim_data = read_sim_data()
+    beta = float(sim_data['beta'])
+    if beta == 0:
+        return Jijs
     # Fill the upper triangular part of the matrix
     for row in range(L):
         # num_elemnts is the number of elements in the upper triangle of
@@ -238,21 +241,24 @@ def load_Jijs(Jij_arr: np.ndarray, L: int):
     return Jijs
 
 
-def compute_fitness(alpha: np.ndarray, hi: np.ndarray, Jij: np.ndarray):
+def compute_fitness(alpha: np.ndarray, alpha0:np.ndarray ,hi: np.ndarray, Jij: np.ndarray):
     """
     Computes the fitness of a strain.
 
     Args:
         alpha (np.ndarray): The alpha vector.
+        alpha0 (np.ndarray): The alpha0 vector.
         hi (np.ndarray): The hi vector.
         Jij (np.ndarray): The Jij matrix.
 
     Returns:
         float: The computed fitness value.
     """
+    F_0 = np.dot(alpha0, hi) + np.dot(alpha0, Jij @ alpha0)
+    F_off = F_0 - 1
     epi = Jij @ alpha
     epi = np.dot(alpha, epi)
-    return np.dot(alpha, hi) + epi
+    return np.dot(alpha, hi) + epi - F_off
 
 
 def compute_fitness_delta_mutant(alpha, hi, Jalpha, k):
@@ -380,44 +386,6 @@ def remove_n_largest(data: list, n: int):
     return res
 
 
-def pull_ranks(n_replicate: int):
-    """
-    Pulls the ranks for a specific replicate.
-
-    Args:
-        n_replicate (int): The replicate number.
-
-    Returns:
-        list: List of ranks.
-    """
-    # Determine the path to the current script
-    current_script_path = os.path.abspath(__file__)
-    # Determine the base directory of the script
-    base_dir = os.path.dirname(os.path.dirname(current_script_path))
-    # Construct the relative paths
-    ld_path = os.path.join(base_dir, 'lenski_data')
-    # Open & read Sim_data
-    rep = "replicate" + str(n_replicate)
-    sim_dat = read_sim_data()
-    # Get sim data
-    n_days = int(sim_dat['n_days'])
-    L = int(sim_dat['L'])
-    output_interval = int(sim_dat['output_interval'])
-    rank_interval = int(sim_dat['rank_interval'])
-    # Iterate over mutant data outputs
-    ranks = []
-    for i in range(0, n_days, output_interval):
-        f_name = f"mut_data.{i}.bin"
-        mut_data_path = os.path.join(ld_path, rep, f_name)
-        mut_data = read_bin_to_type(mut_data_path, 'f', int)
-        mut_order = separate_mut_data(mut_data, L)
-        if i % rank_interval:
-            # We want rank data, which is the element before last in each array
-            ranks.append([arr[-2] for arr in mut_order])
-    rank_times = list(range(0, n_days, rank_interval))
-    return ranks, rank_times
-
-
 def read_sim_data():
     """
     Reads a simulation data file and returns a dictionary with the parameters.
@@ -440,3 +408,29 @@ def read_sim_data():
                 sim_data[key.strip()] = val.strip()
 
     return sim_data
+
+
+def compute_rank(alpha: np.ndarray, hi: np.ndarray, Jij: np.ndarray):
+    """
+    Computes the rank of a strain at time t.
+
+    Args:
+        alpha (np.ndarray): The alpha0 vector.
+        hi (np.ndarray): The hi vector.
+        Jij (np.ndarray): The Jij matrix.
+
+    Returns:
+        int: The computed rank of the strain at time t.
+    """
+    # Some variables
+    L = len(alpha)
+    J_alpha = Jij @ alpha
+    rank = 0
+    # Compute the rank of the strain
+    for i in range(L):
+        delta_i = compute_fitness_delta_mutant(alpha, hi, J_alpha, i)
+        if delta_i > 0:
+            rank += 1
+    return rank
+
+
