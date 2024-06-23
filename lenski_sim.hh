@@ -16,6 +16,8 @@
 #include <time.h>
 #include <gsl/gsl_rng.h>
 #include <boost/container_hash/hash.hpp>
+#include <boost/random.hpp>
+#include <boost/random/discrete_distribution.hpp>
 
 
 using boost::hash_range;
@@ -384,6 +386,13 @@ private:
         auto dom_strain_mut_order = mut_order[dom_strain_ind];
         dom_mut_order.push_back(dom_strain_mut_order);
     };
+
+    /* Chooses integer based on probability entries */
+    int sample_int(const vector<double>& probs) {
+        boost::random::mt19937 gen(static_cast<unsigned int>(std::time(0)));
+        boost::random::discrete_distribution<> dist(probs.begin(), probs.end());
+        return dist(gen);
+    }
 
 };
 

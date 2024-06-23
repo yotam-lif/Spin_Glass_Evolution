@@ -641,19 +641,39 @@ int lenski_sim::compute_rank(
 void lenski_sim::update_rank() {
     // declare variables needed for the computation
     vector<int> beneficial_muts;
-    double avg_fit_inc(0);
-    int mut_ind(0);
+    vector<double> mut_probs(L, 0);
+    double avg_fit_inc(0), ben_inc(0.0);
+    int mut_ind(0), ben_ind(0);
 
     // compute the initial rank and keep trying to reduce the rank.
     // compute the distribution of fitness increments each time so that
     // we will have it when we hit the desired rank.
     int final_rank = compute_rank(0, beneficial_muts, avg_fit_inc, true);
     int row(0), col(0);
-    while (final_rank > init_rank) {
-        // draw mutation index randomly and flip the spin
-        mut_ind = beneficial_muts[gsl_rng_uniform_int(gsl_gen, beneficial_muts.size())];
-        alpha0s[mut_ind] *= -1;
 
+    while (final_rank > init_rank) {
+        // // Nick's code: flip the mutation randomly
+        // // draw mutation index randomly and flip the spin
+        // mut_ind = beneficial_muts[gsl_rng_uniform_int(gsl_gen, beneficial_muts.size())];
+
+        // Yotams code: Create probability vector for each mutation, flip proportional to this probability
+        // First, create vector with beneficial mutations and their fitness increments,
+        // all deleterious mutations have fitness increment 0
+        for (int i = 0; i < beneficial_muts.size(); i++) {
+            ben_ind = beneficial_muts[i];
+            ben_inc = beneficial_incs[i];
+            mut_probs[ben_ind] = ben_inc;
+        }
+        // Normalize mut_probs
+        double sum = std::accumulate(mut_probs.begin(), mut_probs.end(), 0.0);
+        if (sum > 0) {
+            for (auto& mut_prob : mut_probs) {
+                mut_prob /= sum;
+            }
+        }
+        mut_ind = sample_int(mut_probs);
+
+        alpha0s[mut_ind] *= -1;
         // apply corrections to Jalpha
         for (int i = 0; i < L; i++) {
             row = (i <= mut_ind)? i : mut_ind;
