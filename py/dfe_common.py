@@ -312,7 +312,7 @@ def build_alpha(alpha0, mut_series):
     return alpha
 
 
-def compute_dfe(alpha: np.ndarray, hi: np.ndarray, Jij: np.ndarray):
+def compute_dfe(alpha: np.ndarray, hi: np.ndarray, Jij: np.ndarray, ben: bool = False):
     """
     Computes the distribution of fitness effects for a given genome alpha.
 
@@ -320,6 +320,7 @@ def compute_dfe(alpha: np.ndarray, hi: np.ndarray, Jij: np.ndarray):
         alpha (np.ndarray): The alpha(t) vector (not to be confused with alpha0).
         hi (np.ndarray): The hi vector.
         Jij (np.ndarray): The Jij matrix.
+        ben (bool): Whether to consider only beneficial mutations.
 
     Returns:
         list: The DFE for the given strain at the given day.
@@ -329,6 +330,8 @@ def compute_dfe(alpha: np.ndarray, hi: np.ndarray, Jij: np.ndarray):
     for k in range(alpha.size):
         delta_fit_k = compute_fitness_delta_mutant(alpha, hi, Jalpha, k)
         dfe.append(delta_fit_k)
+    if ben:
+        dfe = [x for x in dfe if x >= 0]
     return dfe
 
 
