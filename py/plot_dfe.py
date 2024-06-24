@@ -15,19 +15,23 @@ def stable_pdf(x, alpha, beta, loc, scale):
 if __name__ == '__main__':
     # Define command line options
     parser = argparse.ArgumentParser(description='Compute and plot the distribution of fitness effects (DFE).')
-    parser.add_argument('n_exps', type=int, default=1, help='Number of experiments')
-    parser.add_argument('n_samples', type=int, default=1, help='Number of samples')
-    parser.add_argument('res_pos', type=float, default=10**-3, help='Positive resolution')
-    parser.add_argument('res_neg', type=float, default=5*10**-3, help='Negative resolution')
-    parser.add_argument('n_bins', type=int, default=100, help='Number of bins for the DFE histogram')
-    parser.add_argument('fit', type=bool, default=False, help='To fit the DFE to a stable distribution or not')
-    parser.add_argument('beneficial', type=bool, default=False, help='To plot only beneficial mutations or not')
-    parser.add_argument('dfe_days', nargs='*', type=int, default=[0], help='Days for DFE')
+    parser.add_argument('n_exps', type=int, help='Number of experiments')
+    parser.add_argument('n_samples', type=int, help='Number of samples')
+    parser.add_argument('res_pos', type=float, help='Positive resolution')
+    parser.add_argument('res_neg', type=float, help='Negative resolution')
+    parser.add_argument('n_bins', type=int, help='Number of bins for the DFE histogram')
+    parser.add_argument('--fit', action='store_true', help='Fit the DFE to a stable distribution')
+    parser.add_argument('--no-fit', dest='fit', action='store_false', help='Do not fit the DFE to a stable distribution')
+    parser.add_argument('--beneficial', action='store_true', help='Plot only beneficial mutations')
+    parser.add_argument('--no-beneficial', dest='beneficial', action='store_false', help='Plot both beneficial and deleterious mutations')
+    parser.add_argument('dfe_days', nargs='+', type=int, help='Days for DFE')
+    parser.set_defaults(fit=False, beneficial=False)
     args = parser.parse_args()
+
 
     # Determine the base directory of the script
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    main_dir = os.path.join(base_dir, 'dfe_plots')
+    main_dir = os.path.join(base_dir, 'dfe_plots', 'ben_' + str(args.beneficial))
     os.makedirs(main_dir, exist_ok=True)
     times = args.dfe_days
     ben = args.beneficial

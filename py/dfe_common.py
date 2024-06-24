@@ -217,8 +217,6 @@ def load_Jijs(Jij_arr: np.ndarray, L: int):
     """
     # Initialize the matrix
     Jijs = np.zeros((L, L))
-    # Convert to sparse matrix
-    Jijs = csr_array(Jijs)
 
     # Index for traversing the Jij_arr
     n_elements = 0
