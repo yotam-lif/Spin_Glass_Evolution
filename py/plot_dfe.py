@@ -8,8 +8,16 @@ import numpy as np
 
 
 # Function to fit the stable distribution
-def stable_pdf(x, alpha, beta, loc, scale):
-    return levy_stable.pdf(x, alpha, beta, loc=loc, scale=scale)
+def stable_pdf(x, _alpha, _beta, _loc, _scale):
+    return levy_stable.pdf(x, _alpha, _beta, loc=_loc, scale=_scale)
+
+
+def exponential_pdf(x, _lambda, _A):
+    return _A * np.exp(- x * _lambda)
+
+
+def positive_gaussian_pdf(x, _A, _lambda):
+    return _A * np.exp(- (x ** 2) * _lambda)
 
 
 if __name__ == '__main__':
@@ -22,9 +30,11 @@ if __name__ == '__main__':
     parser.add_argument('n_bins', type=int, help='Number of bins for the DFE histogram')
     parser.add_argument('dir_name', type=str, help='Name of directory data is in')
     parser.add_argument('--fit', action='store_true', help='Fit the DFE to a stable distribution')
-    parser.add_argument('--no-fit', dest='fit', action='store_false', help='Do not fit the DFE to a stable distribution')
+    parser.add_argument('--no-fit', dest='fit', action='store_false',
+                        help='Do not fit the DFE to a stable distribution')
     parser.add_argument('--beneficial', action='store_true', help='Plot only beneficial mutations')
-    parser.add_argument('--no-beneficial', dest='beneficial', action='store_false', help='Plot both beneficial and deleterious mutations')
+    parser.add_argument('--no-beneficial', dest='beneficial', action='store_false',
+                        help='Plot both beneficial and deleterious mutations')
     parser.add_argument('dfe_days', nargs='+', type=int, help='Days for DFE')
     parser.set_defaults(fit=False, beneficial=False)
     args = parser.parse_args()
@@ -93,16 +103,30 @@ if __name__ == '__main__':
                 alpha_t = dfe.build_alpha(alpha0s, mut_order_strain_t)
                 rank = dfe.compute_rank(alpha_t, his, Jijs)
                 # Fit KDE data to stable distribution with initial guesses
-                if args.fit:
+                if args.fit and not args.beneficial:
                     initial_guess = [1.5, -1.0, -0.01, 0.005]
-                    params, _ = curve_fit(stable_pdf, x, kde_values, p0=initial_guess, bounds=((0, -1, -np.inf, 0), (2, 1, np.inf, np.inf)))
+                    params, _ = curve_fit(stable_pdf, x, kde_values, p0=initial_guess,
+                                          bounds=((0, -1, -np.inf, 0), (2, 1, np.inf, np.inf)))
                     # Extract fitted parameters
                     alpha, beta, loc, scale = params
                     # Calculate fitted stable distribution values
                     fitted_stable_values = stable_pdf(x, alpha, beta, loc, scale)
                     # Plot fitted stable distribution
                     plt.plot(x, fitted_stable_values, linestyle='--', label='Fitted stable distribution')
-                    print(f"Fitted stable distribution parameters for {strain}, day {t}: alpha={alpha}, beta={beta}, loc={loc}, scale={scale}")
+                    print(
+                        f"Fitted stable distribution parameters for {strain}, day {t}: alpha={alpha}, beta={beta}, loc={loc}, scale={scale}")
+                elif args.fit and args.beneficial:
+                    initial_guess = [0.1, 0.1]
+                    params, _ = curve_fit(exponential_pdf, x, kde_values, p0=initial_guess,
+                                          bounds=((0, 0), (np.inf, np.inf)))
+                    # Extract fitted parameters
+                    _lambda, _A = params
+                    # Calculate fitted exponential distribution values
+                    fitted_exponential_values = exponential_pdf(x, _lambda, _A)
+                    # Plot fitted exponential distribution
+                    plt.plot(x, fitted_exponential_values, linestyle='--', label='Fitted exponential distribution')
+                    print(
+                        f"Fitted exponential distribution parameters for {strain}, day {t}: lambda={_lambda}, A={_A}")
                 # Plot
                 plt.legend()
                 plt.title(f"strain number: {strain}, day: {t}, rank: {rank}")
