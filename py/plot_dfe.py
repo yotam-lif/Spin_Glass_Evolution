@@ -38,7 +38,7 @@ if __name__ == '__main__':
     for i in range(args.n_exps):
         # Pull data
         alpha0s, his, Jijs = dfe.pull_env(i, args.dir_name)
-        Jijs = dfe.load_Jijs(Jijs, alpha0s.size)
+        Jijs = dfe.load_Jijs(Jijs, alpha0s.size, args.dir_name)
         mut_order, mut_times, dom_strain_mut_order = dfe.pull_mut_hist(i, args.dir_name)
 
         # dfes will hold the dfe data
