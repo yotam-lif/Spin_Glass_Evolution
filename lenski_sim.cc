@@ -659,7 +659,8 @@ void lenski_sim::update_rank() {
         // Yotams code: Create probability vector for each mutation, flip proportional to this probability
         // First, create vector with beneficial mutations and their fitness increments,
         // all deleterious mutations have fitness increment 0
-        for (int i = 0; i < beneficial_muts.size(); i++) {
+        std::fill(mut_probs.begin(), mut_probs.end(), 0);
+        for (size_t i = 0; i < beneficial_muts.size(); i++) {
             ben_ind = beneficial_muts[i];
             ben_inc = beneficial_incs[i];
             mut_probs[ben_ind] = ben_inc;

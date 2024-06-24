@@ -15,10 +15,9 @@
 #include <random>
 #include <time.h>
 #include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 #include <boost/container_hash/hash.hpp>
 #include <boost/random.hpp>
-#include <boost/random/discrete_distribution.hpp>
-
 
 using boost::hash_range;
 using std::vector;
@@ -388,10 +387,24 @@ private:
     };
 
     /* Chooses integer based on probability entries */
-    int sample_int(const vector<double>& probs) {
-        boost::random::mt19937 gen(static_cast<unsigned int>(std::time(0)));
-        boost::random::discrete_distribution<> dist(probs.begin(), probs.end());
-        return dist(gen);
+    int sample_int(const std::vector<double>& probs) {
+        // Initialize the GSL random number generator
+        gsl_rng *r = gsl_rng_alloc(gsl_rng_taus);
+        gsl_rng_set(r, gsl_rng_default_seed);
+
+        // Create GSL discrete distribution from probs
+        gsl_ran_discrete_t *gsl_dist = gsl_ran_discrete_preproc(probs.size(), probs.data());
+
+        // Sample mutation index
+        int sample = gsl_ran_discrete(r, gsl_dist);
+
+        // Clean up GSL discrete distribution
+        gsl_ran_discrete_free(gsl_dist);
+
+        // Free GSL random number generator
+        gsl_rng_free(r);
+
+        return sample;
     }
 
 };
