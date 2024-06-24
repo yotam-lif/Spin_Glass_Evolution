@@ -2,6 +2,7 @@ import os
 import struct
 import math
 import numpy as np
+from scipy.sparse import csr_array
 
 
 def read_bin_to_type(path, _type_bin, _type):
@@ -214,7 +215,10 @@ def load_Jijs(Jij_arr: np.ndarray, L: int):
     Returns:
         np.ndarray: The symmetric matrix of Jijs.
     """
+    # Initialize the matrix
     Jijs = np.zeros((L, L))
+    # Convert to sparse matrix
+    Jijs = csr_array(Jijs)
 
     # Index for traversing the Jij_arr
     n_elements = 0
