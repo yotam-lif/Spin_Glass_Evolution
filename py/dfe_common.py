@@ -194,7 +194,7 @@ def pull_mut_hist(n_replicate: int, dir_name: str):
     ld_path = os.path.join(base_dir, dir_name)
     # Open & read Sim_data
     rep = "replicate" + str(n_replicate)
-    sim_dat = read_sim_data()
+    sim_dat = read_sim_data(dir_name)
     # Output_interval is 6th item
     n_days = int(sim_dat['ndays'])
     L = int(sim_dat['L'])
@@ -215,7 +215,7 @@ def pull_mut_hist(n_replicate: int, dir_name: str):
     return mut_order, mut_times, dom_strain
 
 
-def load_Jijs(Jij_arr: np.ndarray, L: int):
+def load_Jijs(Jij_arr: np.ndarray, L: int, dir_name: str):
     """
     Takes the vector of Jijs as loaded from binary and
     converts it into a symmetric matrix.
@@ -223,6 +223,7 @@ def load_Jijs(Jij_arr: np.ndarray, L: int):
     Args:
         Jij_arr (np.ndarray): The array of Jij values.
         L (int): The size of the matrix.
+        dir_name (str): The name of the directory containing the data.
 
     Returns:
         np.ndarray: The symmetric matrix of Jijs.
@@ -234,7 +235,7 @@ def load_Jijs(Jij_arr: np.ndarray, L: int):
     n_elements = 0
 
     # If beta == 0 then Jijs is just a matrix of zeros
-    sim_data = read_sim_data()
+    sim_data = read_sim_data(dir_name)
     beta = float(sim_data['beta'])
     if beta == 0:
         return Jijs
@@ -255,7 +256,7 @@ def load_Jijs(Jij_arr: np.ndarray, L: int):
     return Jijs
 
 
-def compute_fitness(alpha: np.ndarray, alpha0:np.ndarray ,hi: np.ndarray, Jij: np.ndarray):
+def compute_fitness(alpha: np.ndarray, alpha0: np.ndarray, hi: np.ndarray, Jij: np.ndarray):
     """
     Computes the fitness of a strain.
 
@@ -449,5 +450,3 @@ def compute_rank(alpha: np.ndarray, hi: np.ndarray, Jij: np.ndarray):
         if delta_i > 0:
             rank += 1
     return rank
-
-
