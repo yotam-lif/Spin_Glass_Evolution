@@ -70,12 +70,13 @@ def read_txt_to_type(path, _type):
     return [[_type(x) for x in line] for line in read_txt_file(path)]
 
 
-def pull_env(n_replicate: int):
+def pull_env(n_replicate: int, dir_name: str):
     """
     Pulls the environment data for a specific replicate.
 
     Args:
         n_replicate (int): The replicate number.
+        dir_name (str): The name of the directory containing the data.
 
     Returns:
         tuple: alpha0s, his, and Jijs as numpy arrays.
@@ -86,9 +87,9 @@ def pull_env(n_replicate: int):
     base_dir = os.path.dirname(os.path.dirname(current_script_path))
     # Construct the relative paths
     rep = "replicate" + str(n_replicate)
-    J_path = os.path.join(base_dir, 'lenski_data', rep, 'Jijs.dat.bin')
-    h_path = os.path.join(base_dir, 'lenski_data', rep, 'his.dat.bin')
-    alpha0_path = os.path.join(base_dir, 'lenski_data', rep, 'alpha0s.dat')
+    J_path = os.path.join(base_dir, dir_name, rep, 'Jijs.dat.bin')
+    h_path = os.path.join(base_dir, dir_name, rep, 'his.dat.bin')
+    alpha0_path = os.path.join(base_dir, dir_name, rep, 'alpha0s.dat')
 
     # Open and read
     Jijs = np.array(read_bin_to_type(J_path, 'd', float))
@@ -98,12 +99,13 @@ def pull_env(n_replicate: int):
     return alpha0s, his, Jijs
 
 
-def pull_bac_data(n_replicate: int):
+def pull_bac_data(n_replicate: int, dir_name: str):
     """
     Pulls the bacteria data for a specific replicate.
 
     Args:
         n_replicate (int): The replicate number.
+        dir_name (str): The name of the directory containing the data.
 
     Returns:
         list: List of bacteria data.
@@ -113,7 +115,7 @@ def pull_bac_data(n_replicate: int):
     # Determine the base directory of the script
     base_dir = os.path.dirname(os.path.dirname(current_script_path))
     # Construct the relative paths
-    ld_path = os.path.join(base_dir, 'lenski_data')
+    ld_path = os.path.join(base_dir, dir_name)
     # Open & read Sim_data
     rep = "replicate" + str(n_replicate)
     sim_path = os.path.join(ld_path, 'sim_data.txt')
@@ -173,13 +175,23 @@ def separate_mut_data(mut_data: list, L: int):
     return res
 
 
-def pull_mut_hist(n_replicate: int):
+def pull_mut_hist(n_replicate: int, dir_name: str):
+    """
+    Pulls the mutation history data for a specific replicate.
+
+    Args:
+        n_replicate (int): The replicate number.
+        dir_name (str): The name of the directory containing the data.
+
+    Returns:
+        tuple: The mutation order, mutation times, and dominant strain data.
+    """
     # Determine the path to the current script
     current_script_path = os.path.abspath(__file__)
     # Determine the base directory of the script
     base_dir = os.path.dirname(os.path.dirname(current_script_path))
     # Construct the relative paths
-    ld_path = os.path.join(base_dir, 'lenski_data')
+    ld_path = os.path.join(base_dir, dir_name)
     # Open & read Sim_data
     rep = "replicate" + str(n_replicate)
     sim_dat = read_sim_data()
@@ -391,7 +403,7 @@ def remove_n_largest(data: list, n: int):
     return res
 
 
-def read_sim_data():
+def read_sim_data(dir_name: str):
     """
     Reads a simulation data file and returns a dictionary with the parameters.
 
@@ -402,7 +414,7 @@ def read_sim_data():
     # Determine the base directory of the script
     base_dir = os.path.dirname(os.path.dirname(current_script_path))
     # Construct the relative paths
-    ld_path = os.path.join(base_dir, 'lenski_data')
+    ld_path = os.path.join(base_dir, dir_name)
     # Open & read Sim_data
     file_path = os.path.join(ld_path, 'sim_data.txt')
     sim_data = {}

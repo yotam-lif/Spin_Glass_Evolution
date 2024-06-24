@@ -20,6 +20,7 @@ if __name__ == '__main__':
     parser.add_argument('res_pos', type=float, help='Positive resolution')
     parser.add_argument('res_neg', type=float, help='Negative resolution')
     parser.add_argument('n_bins', type=int, help='Number of bins for the DFE histogram')
+    parser.add_argument('dir_name', type=str, help='Name of directory data is in')
     parser.add_argument('--fit', action='store_true', help='Fit the DFE to a stable distribution')
     parser.add_argument('--no-fit', dest='fit', action='store_false', help='Do not fit the DFE to a stable distribution')
     parser.add_argument('--beneficial', action='store_true', help='Plot only beneficial mutations')
@@ -28,19 +29,17 @@ if __name__ == '__main__':
     parser.set_defaults(fit=False, beneficial=False)
     args = parser.parse_args()
 
-
     # Determine the base directory of the script
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     main_dir = os.path.join(base_dir, 'dfe_plots', 'ben_' + str(args.beneficial))
     os.makedirs(main_dir, exist_ok=True)
     times = args.dfe_days
-    ben = args.beneficial
 
     for i in range(args.n_exps):
         # Pull data
-        alpha0s, his, Jijs = dfe.pull_env(i)
+        alpha0s, his, Jijs = dfe.pull_env(i, args.dir_name)
         Jijs = dfe.load_Jijs(Jijs, alpha0s.size)
-        mut_order, mut_times, dom_strain_mut_order = dfe.pull_mut_hist(i)
+        mut_order, mut_times, dom_strain_mut_order = dfe.pull_mut_hist(i, args.dir_name)
 
         # dfes will hold the dfe data
         dfes = []
@@ -49,12 +48,12 @@ if __name__ == '__main__':
         for t in times:
             mut_order_t = dom_strain_mut_order[t]
             alpha = dfe.build_alpha(alpha0s, mut_order_t)
-            dfe_t = dfe.compute_dfe(alpha, his, Jijs, ben)
+            dfe_t = dfe.compute_dfe(alpha, his, Jijs, args.beneficial)
             dfes_dom.append(dfe_t)
         dfes.append(dfes_dom)
 
         # Add strains we chose to track lineages for
-        bac_data = dfe.pull_bac_data(i)
+        bac_data = dfe.pull_bac_data(i, args.dir_name)
         # enum_pops is a list of tuples (strain, bac_data[strain]) sorted by bac_data[strain]
         # For purposes of plotting dominant strains first
         enum_pops = sorted(enumerate(bac_data), key=lambda x: x[1], reverse=True)
@@ -67,7 +66,7 @@ if __name__ == '__main__':
             for t in times:
                 mut_order_strain_t = dfe.build_mut_series_t(mut_order[strain], mut_times[strain], t)
                 alpha = dfe.build_alpha(alpha0s, mut_order_strain_t)
-                dfe_t = dfe.compute_dfe(alpha, his, Jijs, ben)
+                dfe_t = dfe.compute_dfe(alpha, his, Jijs, args.beneficial)
                 dfes_strain.append(dfe_t)
             dfes.append(dfes_strain)
         # The first element in dfes is the "dominant strain" DFE
