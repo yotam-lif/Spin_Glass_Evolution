@@ -102,6 +102,7 @@ if __name__ == '__main__':
     parser.add_argument('n_samples', type=int, default=1, help='Number of samples')
     parser.add_argument('bins', type=int, default=30, help='n_bins for histogram')
     parser.add_argument('border', type=float, default=0.0, help='Scales x axis of histograms')
+    parser.add_argument('dir_name', type=str, help='Name of directory data is in')
     parser.add_argument('dfe_days', nargs='*', type=int, default=[0], help='Days for DFE')
     args = parser.parse_args()
 
@@ -110,21 +111,22 @@ if __name__ == '__main__':
     # Determine the base directory of the script
     base_dir = os.path.dirname(os.path.dirname(current_script_path))
     # Create the main directory if it doesn't exist
-    main_dir = os.path.join(base_dir, 'dfe_tracker_plots')
+    dir_name = args.dir_name
+    main_dir = os.path.join(base_dir, 'dfe_tracker_plots_' + dir_name)
     os.makedirs(main_dir, exist_ok=True)
     times = [0]  # We always want to track the DFE at day 0
     times.extend(args.dfe_days)  # Add the days we want to track the DFE for
     bins = args.bins
     for i in range(args.n_exps):
         # Pull data
-        alpha0s, his, Jijs = dfe.pull_env(i)
-        Jijs = dfe.load_Jijs(Jijs, alpha0s.size)
-        mut_order, mut_times, _ = dfe.pull_mut_hist(i)
+        alpha0s, his, Jijs = dfe.pull_env(i, dir_name)
+        Jijs = dfe.load_Jijs(Jijs, alpha0s.size, dir_name)
+        mut_order, mut_times, _ = dfe.pull_mut_hist(i, dir_name)
         # dfes will hold the dfe data for each strain at deisgnated times
         # len(dfes) = n_samples
         dfes = []
         # Then add strains we chose to track lineages for
-        bac_data = dfe.pull_bac_data(i)
+        bac_data = dfe.pull_bac_data(i, dir_name)
         # enum_pops is a list of tuples (index, population) sorted by population in descending order
         enum_pops = list(enumerate(bac_data))
         enum_pops.sort(key=lambda x: x[1], reverse=True)
