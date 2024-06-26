@@ -724,7 +724,7 @@ void lenski_sim::simulate_experiment(int n_days, double dt) {
 
         // @ Yotam
         // Update dominant strain.
-        update_dom_mut_order();
+        // update_dom_mut_order();
 
         // perform and time the dilution.
         time(&dilute_start);
@@ -746,7 +746,8 @@ void lenski_sim::simulate_experiment(int n_days, double dt) {
     // Final dump of simulation data.
     output_bac_data_bin("bac_data");
     output_mut_data_bin("mut_data");
-    output_dfe_data();
+    output_mut_times_data();
+    // output_dom_dfe_data();
     output_bin_counts();
 
     // Output total time information.
@@ -1068,20 +1069,33 @@ void lenski_sim::output_mut_data_bin(string file_name) {
     }
 }
 
-void lenski_sim::output_dfe_data() {
-    string dom_path = output_folder + "/dom_strain.dat";
+void lenski_sim::output_mut_times_data() {
     string mut_times_path = output_folder + "/mut_times.dat";
-    std::ofstream dom_outFile(dom_path);
     std::ofstream mut_times_outFile(mut_times_path);
-    if (!dom_outFile.is_open()) {
-        std::cerr << "Error opening file for writing: " << dom_path << std::endl;
-        return;
-    }
     if (!mut_times_outFile.is_open()) {
         std::cerr << "Error opening file for writing: " << mut_times_path << std::endl;
         return;
     }
-    int dom(0); int mut_time(0);
+    int mut_time(0);
+
+    for (auto strain_mut_times : mut_times) {
+        for (int i = 0; i < strain_mut_times.size() - 1; i++) {
+            mut_time = strain_mut_times[i];
+            mut_times_outFile << mut_time << " ";
+        }
+        mut_times_outFile << strain_mut_times[strain_mut_times.size() - 1] << "\n";
+    }
+    mut_times_outFile.close();
+}
+
+void lenski_sim::output_dom_dfe_data() {
+    string dom_path = output_folder + "/dom_strain.dat";
+    std::ofstream dom_outFile(dom_path);
+    if (!dom_outFile.is_open()) {
+        std::cerr << "Error opening file for writing: " << dom_path << std::endl;
+        return;
+    }
+    int dom(0);
 
     // There are n_days lines, each one with the mut order of the dominant strain end of that day.
     for (auto strain_mut_order : dom_mut_order) {
@@ -1095,15 +1109,6 @@ void lenski_sim::output_dfe_data() {
         dom_outFile << "\n"; // Write last one with no seperator
     }
     dom_outFile.close();
-
-    for (auto strain_mut_times : mut_times) {
-        for (int i = 0; i < strain_mut_times.size() - 1; i++) {
-            mut_time = strain_mut_times[i];
-            mut_times_outFile << mut_time << " ";
-        }
-        mut_times_outFile << strain_mut_times[strain_mut_times.size() - 1] << "\n";
-    }
-    mut_times_outFile.close();
 }
 
 /* Outputs the h_i values in binary. */

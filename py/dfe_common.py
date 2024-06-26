@@ -211,7 +211,8 @@ def pull_mut_hist(n_replicate: int, dir_name: str):
     mut_times_path = os.path.join(ld_path, rep, "mut_times.dat")
     mut_times = read_txt_to_type(mut_times_path, int)
     dom_path = os.path.join(ld_path, rep, "dom_strain.dat")
-    dom_strain = read_txt_to_type(dom_path, int)
+    # dom_strain = read_txt_to_type(dom_path, int)
+    dom_strain = []
     return mut_order, mut_times, dom_strain
 
 

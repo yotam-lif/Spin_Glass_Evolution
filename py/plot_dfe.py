@@ -54,13 +54,13 @@ if __name__ == '__main__':
         # dfes will hold the dfe data
         dfes = []
         # Calculate the DFE for the dominant strain at given days
-        dfes_dom = []
-        for t in times:
-            mut_order_t = dom_strain_mut_order[t]
-            alpha = dfe.build_alpha(alpha0s, mut_order_t)
-            dfe_t = dfe.compute_dfe(alpha, his, Jijs, args.beneficial)
-            dfes_dom.append(dfe_t)
-        dfes.append(dfes_dom)
+        # dfes_dom = []
+        # for t in times:
+        #     mut_order_t = dom_strain_mut_order[t]
+        #     alpha = dfe.build_alpha(alpha0s, mut_order_t)
+        #     dfe_t = dfe.compute_dfe(alpha, his, Jijs, args.beneficial)
+        #     dfes_dom.append(dfe_t)
+        # dfes.append(dfes_dom)
 
         # Add strains we chose to track lineages for
         bac_data = dfe.pull_bac_data(i, args.dir_name)

@@ -365,10 +365,12 @@ private:
 
     // * Yotam *
 
-    /* Outputs the following data used to process the DFE for different strains at different timestamps:
-     * 1. 'mut_times' - the companion vector to 'mut_order', which gives the day for each mutation in 'mut_order'.
-     * */
-    void output_dfe_data();
+    /* Outputs the mutation times for the lineages that survive.
+     * Complimentary to mut_order. */
+    void output_mut_times_data();
+
+    /* Outputs the mutation order for the dominant strain. */
+    void output_dom_dfe_data();
 
     /* Saves at the end of each day the mutation order vector of the dominant strain that day.
      * For purposes of DFE, without changing Nicks code. */
