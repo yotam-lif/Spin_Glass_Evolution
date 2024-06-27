@@ -12,8 +12,8 @@ def stable_pdf(x, _alpha, _beta, _loc, _scale):
     return levy_stable.pdf(x, _alpha, _beta, loc=_loc, scale=_scale)
 
 
-def exponential_pdf(x, _lambda, _A):
-    return _A * np.exp(- x * _lambda)
+def exponential_pdf(x, _lambda):
+    return _lambda * np.exp(- x * _lambda)
 
 
 def positive_gaussian_pdf(x, _A, _lambda):
@@ -51,14 +51,6 @@ if __name__ == '__main__':
 
         # dfes will hold the dfe data
         dfes = []
-        # Calculate the DFE for the dominant strain at given days
-        # dfes_dom = []
-        # for t in times:
-        #     mut_order_t = dom_strain_mut_order[t]
-        #     alpha = dfe.build_alpha(alpha0s, mut_order_t)
-        #     dfe_t = dfe.compute_dfe(alpha, his, Jijs, args.beneficial)
-        #     dfes_dom.append(dfe_t)
-        # dfes.append(dfes_dom)
 
         # Add strains we chose to track lineages for
         bac_data = dfe.pull_bac_data(i, args.dir_name)
@@ -88,6 +80,9 @@ if __name__ == '__main__':
                 # dfe_strain_j[k] is the DFE for strain j at day k
                 t = times[k]
                 # Create a histogram for each dfe_t
+                plt.figure(figsize=(12, 6))
+
+                plt.subplot(1, 2, 1)
                 plt.hist(dfe_t, bins=args.n_bins, density=True, label='Raw Data')
                 # Fit a KDE to the histogram data
                 kde = gaussian_kde(dfe_t, bw_method='silverman')
@@ -114,22 +109,61 @@ if __name__ == '__main__':
                     print(
                         f"Fitted stable distribution parameters for {strain}, day {t}: alpha={alpha}, beta={beta}, loc={loc}, scale={scale}")
                 elif args.fit and args.beneficial:
-                    initial_guess = [0.1, 0.1]
+                    initial_guess = [1]
                     params, _ = curve_fit(exponential_pdf, x, kde_values, p0=initial_guess,
-                                          bounds=((0, 0), (np.inf, np.inf)))
+                                          bounds=(0, np.inf))
                     # Extract fitted parameters
-                    _lambda, _A = params
+                    _lambda = params[0]
                     # Calculate fitted exponential distribution values
-                    fitted_exponential_values = exponential_pdf(x, _lambda, _A)
+                    fitted_exponential_values = exponential_pdf(x, _lambda)
                     # Plot fitted exponential distribution
                     plt.plot(x, fitted_exponential_values, linestyle='--', label='Fitted exponential distribution')
                     print(
-                        f"Fitted exponential distribution parameters for {strain}, day {t}: lambda={_lambda}, A={_A}")
-                # Plot
+                        f"Fitted exponential distribution parameters for {strain}, day {t}: lambda={_lambda}")
+
+                    # Calculate chi-squared value for the exponential fit
+                    observed = kde_values
+                    expected = exponential_pdf(x, _lambda)
+                    chi_squared = round(sum((observed - expected) ** 2 / expected), 2)
+                    plt.text(0.95, 0.95, f'Chi squared: {chi_squared}', transform=plt.gca().transAxes,
+                             verticalalignment='top', horizontalalignment='right')
+
                 plt.legend()
                 plt.title(f"strain number: {strain}, day: {t}, rank: {rank}")
                 plt.xlabel('Fitness effect')
                 plt.ylabel('Frequency')
+
+                # Plot the beneficial tail histogram and fit to an exponential distribution
+                plt.subplot(1, 2, 2)
+                beneficial_dfe_t = [x for x in dfe_t if x > 0]
+                if len(beneficial_dfe_t) > 0:
+                    counts, bins, _ = plt.hist(beneficial_dfe_t, bins=args.n_bins, density=True, alpha=0.6, label='Beneficial tail')
+                    kde_beneficial = gaussian_kde(beneficial_dfe_t, bw_method='silverman')
+                    x_beneficial = np.linspace(min(beneficial_dfe_t), max(beneficial_dfe_t), 1000)
+                    kde_beneficial_values = kde_beneficial(x_beneficial)
+                    plt.plot(x_beneficial, kde_beneficial_values, label='KDE')
+
+                    # Fit to exponential
+                    initial_guess = [1]
+                    params, _ = curve_fit(exponential_pdf, x_beneficial, kde_beneficial_values, p0=initial_guess)
+                    _lambda = params[0]
+                    fitted_exponential_values = exponential_pdf(x_beneficial, _lambda)
+                    plt.plot(x_beneficial, fitted_exponential_values, linestyle='--', label='Fitted exponential')
+
+                    # Calculate chi-squared value
+                    observed_beneficial = kde_beneficial_values
+                    expected_beneficial = exponential_pdf(x_beneficial, _lambda)
+                    chi_squared_beneficial = round(sum((observed_beneficial - expected_beneficial) ** 2 / expected_beneficial), 2)
+
+                    # Annotate the chi-squared value on the plot
+                    plt.text(0.95, 0.95, f'Chi squared: {chi_squared_beneficial}', transform=plt.gca().transAxes,
+                             verticalalignment='top', horizontalalignment='right')
+
+                    plt.legend()
+                    plt.title(f'Beneficial Tail Histogram and Fit (strain: {strain}, day: {t})')
+                    plt.xlabel('Fitness effect')
+                    plt.ylabel('Frequency')
+
                 # Save the plot in the strain's directory
                 plt.savefig(os.path.join(strain_dir, f"dfe_day_{t}.png"))
                 plt.close()

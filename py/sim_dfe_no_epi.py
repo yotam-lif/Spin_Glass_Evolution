@@ -16,8 +16,8 @@ import os
 # If alpha_x_hi is negative, this can "evolve" to match. We "eat" these members and turn them positive.
 # We just do the uncomplicated thing and "eat" the positives, and then dfe is 2* alpha_x_hi instead of -2 * alpha_x_hi.
 
-def exponent(x, _A, _lambda):
-    return _A * np.exp(-x * _lambda)
+def exponent(x, _lambda):
+    return _lambda * np.exp(-x * _lambda)
 
 
 def run_simulation(L, times, dir_path):
@@ -87,7 +87,7 @@ def run_simulation(L, times, dir_path):
 
                 # Fit to exponential
                 bin_centers = (bins_ben[:-1] + bins_ben[1:]) / 2
-                params, _ = curve_fit(exponent, bin_centers, counts_ben, p0=[1, 1])
+                params, _ = curve_fit(exponent, bin_centers, counts_ben, p0=[1])
                 fitted_data = exponent(bin_centers, *params)
                 ax2.plot(bin_centers, fitted_data, 'r--', label='Exponential Fit')
 
@@ -95,9 +95,7 @@ def run_simulation(L, times, dir_path):
                 chi_squared = np.sum((counts_ben - fitted_data) ** 2 / fitted_data)
                 ax2.text(0.95, 0.95, f'Chi-squared: {chi_squared:.2f}', transform=ax2.transAxes,
                          verticalalignment='top', horizontalalignment='right')
-                ax2.text(0.95, 0.90, f'A: {params[0]:.2f}', transform=ax2.transAxes,
-                         verticalalignment='top', horizontalalignment='right')
-                ax2.text(0.95, 0.85, f'λ: {params[1]:.2f}', transform=ax2.transAxes,
+                ax2.text(0.95, 0.90, f'λ: {params[0]:.2f}', transform=ax2.transAxes,
                          verticalalignment='top', horizontalalignment='right')
 
             plt.tight_layout()
