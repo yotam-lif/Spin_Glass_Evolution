@@ -25,8 +25,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Compute and plot the distribution of fitness effects (DFE).')
     parser.add_argument('n_exps', type=int, help='Number of experiments')
     parser.add_argument('n_samples', type=int, help='Number of samples')
-    parser.add_argument('res_pos', type=float, help='Positive resolution')
-    parser.add_argument('res_neg', type=float, help='Negative resolution')
     parser.add_argument('n_bins', type=int, help='Number of bins for the DFE histogram')
     parser.add_argument('dir_name', type=str, help='Name of directory data is in')
     parser.add_argument('--fit', action='store_true', help='Fit the DFE to a stable distribution')

@@ -19,8 +19,8 @@ echo "Python executable: $(which python)" >> out_graph.txt
 echo "Python version: $(python --version)" >> out_graph.txt
 echo "Python path: $(python -c 'import sys; print(sys.path)')" >> out_graph.txt
 
-# Run the Python script with arguments: nexps, nsamples, pos_res, neg_res, dir_name, fit(bool), beneficial(bool) [times]
-python plot_dfe.py 1 1 0.0002 0.0002 40 "lenski_data" --no-fit --no-beneficial 0 10000 20000 30000 40000 49990 >> out_graph.txt 2>> err_graph.txt
+# Run the Python script with arguments: nexps, nsamples, dir_name, fit(bool), beneficial(bool) [times]
+python plot_dfe.py 1 1 40 "lenski_data" --no-fit --no-beneficial 0 10000 20000 30000 40000 49990 >> out_graph.txt 2>> err_graph.txt
 
 # Check if the script ran successfully
 if [ $? -eq 0 ]; then
