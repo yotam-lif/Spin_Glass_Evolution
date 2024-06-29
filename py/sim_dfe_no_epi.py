@@ -22,7 +22,7 @@ def exponent(x, _lambda):
 
 def run_simulation(L, times, dir_path):
     # Build DFE vector
-    alphai_x_hi = np.random.normal(0, 1, L)
+    alphai_x_hi = np.random.normal(0, 10, L)
 
     # Initialize a dictionary to store DFE at specified times
     saved_DFEs = {}
@@ -64,7 +64,7 @@ def run_simulation(L, times, dir_path):
 
             # Main DFE Histogram
             counts, bins, _ = ax1.hist(saved_DFEs[t], bins=50, density=True, alpha=0.6)
-            ax1.set_title(f'DFE Histogram at t={t}')
+            ax1.set_title(f'DFE Histogram at mut={t}')
             ax1.set_xlabel('Fitness effect')
             ax1.set_ylabel('Frequency')
 
@@ -77,11 +77,14 @@ def run_simulation(L, times, dir_path):
             ax1.axvline(max_value, color='r', linestyle='dashed', linewidth=1)
             ax1.text(max_value, 0.1, f'Max: {max_value:.2f}', rotation=90)
 
+            # Add vertical line at x=0
+            ax1.axvline(0, color='g', linestyle='dashed', linewidth=1)
+
             # Beneficial Tail Histogram and Exponential Fit
             beneficial_data = [x for x in saved_DFEs[t] if x >= 0]
             if len(beneficial_data) > 0:
                 counts_ben, bins_ben, _ = ax2.hist(beneficial_data, bins=30, density=True, alpha=0.6, color='g')
-                ax2.set_title(f'Beneficial Tail at t={t}')
+                ax2.set_title(f'Beneficial Tail at mut={t}')
                 ax2.set_xlabel('Fitness effect')
                 ax2.set_ylabel('Frequency')
 
@@ -91,8 +94,9 @@ def run_simulation(L, times, dir_path):
                 fitted_data = exponent(bin_centers, *params)
                 ax2.plot(bin_centers, fitted_data, 'r--', label='Exponential Fit')
 
-                # Calculate chi-squared value
+                # Calculate chi-squared value, rounded to 2 significant digits after decimal point
                 chi_squared = np.sum((counts_ben - fitted_data) ** 2 / fitted_data)
+                
                 ax2.text(0.95, 0.95, f'Chi-squared: {chi_squared:.2f}', transform=ax2.transAxes,
                          verticalalignment='top', horizontalalignment='right')
                 ax2.text(0.95, 0.90, f'λ: {params[0]:.2f}', transform=ax2.transAxes,
