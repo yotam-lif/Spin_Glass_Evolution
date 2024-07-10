@@ -44,7 +44,7 @@ echo "Running lenski_main..." >> out_$LSB_JOBID.txt 2>> err_$LSB_JOBID.txt
 
 # Run the executable with arguments
 # L, N_0, N_f, ndays, nexps, dt, p_val (p*L prob per division), output_interval, base_folder, init_rank, rank_interval, rho, beta, delta, hoc
-./lenski_main 1e3 5e6 5e8 1e5 1 0.01 1e-6 1e4 "lenski_data" 100 10000 0.05 0.75 0.005 0
+./lenski_main 1e3 5e6 5e8 1e6 1 0.01 1e-6 1e5 "lenski_data" -1 100000 0.05 0.75 0.005 0
 
 # Capture the exit code
 EXIT_CODE=$?
