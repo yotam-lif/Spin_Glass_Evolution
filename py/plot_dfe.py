@@ -13,7 +13,7 @@ def stable_pdf(x, _alpha, _beta, _loc, _scale):
 
 
 def exponential_pdf(x, _lambda):
-    return _lambda * np.exp(- x * _lambda)
+    return _lambda * np.exp(-x * _lambda)
 
 
 def positive_gaussian_pdf(x, _A, _lambda):
@@ -30,16 +30,13 @@ if __name__ == '__main__':
     parser.add_argument('--fit', action='store_true', help='Fit the DFE to a stable distribution')
     parser.add_argument('--no-fit', dest='fit', action='store_false',
                         help='Do not fit the DFE to a stable distribution')
-    parser.add_argument('--beneficial', action='store_true', help='Plot only beneficial mutations')
-    parser.add_argument('--no-beneficial', dest='beneficial', action='store_false',
-                        help='Plot both beneficial and deleterious mutations')
     parser.add_argument('dfe_days', nargs='+', type=int, help='Days for DFE')
-    parser.set_defaults(fit=False, beneficial=False)
+    parser.set_defaults(fit=False)
     args = parser.parse_args()
 
     # Determine the base directory of the script
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    main_dir = os.path.join(base_dir, 'dfe_plots_' + args.dir_name, 'ben_' + str(args.beneficial))
+    main_dir = os.path.join(base_dir, 'dfe_plots_' + args.dir_name)
     os.makedirs(main_dir, exist_ok=True)
     times = args.dfe_days
 
@@ -83,7 +80,7 @@ if __name__ == '__main__':
                 plt.figure(figsize=(12, 6))
 
                 plt.subplot(1, 2, 1)
-                plt.hist(dfe_t, bins=args.n_bins, density=True, label='Raw Data')
+                counts, bins, _ = plt.hist(dfe_t, bins=args.n_bins, density=True, label='Raw Data')
                 # Fit a KDE to the histogram data
                 kde = gaussian_kde(dfe_t, bw_method='silverman')
                 x = np.linspace(min(dfe_t), max(dfe_t), 1000)
@@ -96,7 +93,7 @@ if __name__ == '__main__':
                 alpha_t = dfe.build_alpha(alpha0s, mut_order_strain_t)
                 rank = dfe.compute_rank(alpha_t, his, Jijs)
                 # Fit KDE data to stable distribution with initial guesses
-                if args.fit and not args.beneficial:
+                if args.fit:
                     initial_guess = [1.5, -1.0, -0.01, 0.005]
                     params, _ = curve_fit(stable_pdf, x, kde_values, p0=initial_guess,
                                           bounds=((0, -1, -np.inf, 0), (2, 1, np.inf, np.inf)))
@@ -108,25 +105,20 @@ if __name__ == '__main__':
                     plt.plot(x, fitted_stable_values, linestyle='--', label='Fitted stable distribution')
                     print(
                         f"Fitted stable distribution parameters for {strain}, day {t}: alpha={alpha}, beta={beta}, loc={loc}, scale={scale}")
-                elif args.fit and args.beneficial:
-                    initial_guess = [1]
-                    params, _ = curve_fit(exponential_pdf, x, kde_values, p0=initial_guess,
-                                          bounds=(0, np.inf))
-                    # Extract fitted parameters
-                    _lambda = params[0]
-                    # Calculate fitted exponential distribution values
-                    fitted_exponential_values = exponential_pdf(x, _lambda)
-                    # Plot fitted exponential distribution
-                    plt.plot(x, fitted_exponential_values, linestyle='--', label='Fitted exponential distribution')
-                    print(
-                        f"Fitted exponential distribution parameters for {strain}, day {t}: lambda={_lambda}")
 
-                    # Calculate chi-squared value for the exponential fit
-                    observed = kde_values
-                    expected = exponential_pdf(x, _lambda)
-                    chi_squared = round(sum((observed - expected) ** 2 / expected), 2)
-                    plt.text(0.95, 0.95, f'Chi squared: {chi_squared}', transform=plt.gca().transAxes,
-                             verticalalignment='top', horizontalalignment='right')
+                # Add vertical lines
+                mean_val = np.mean(dfe_t)
+                max_index = np.argmax(counts)
+                max_val = bins[max_index]
+                plt.axvline(mean_val, color='k', linestyle='dashed', linewidth=1)
+                plt.axvline(max_val, color='r', linestyle='dashed', linewidth=1)
+                plt.axvline(0, color='g', linestyle='dashed', linewidth=1)
+
+                # Annotate the vertical lines
+                ylim = plt.ylim()
+                plt.text(mean_val, ylim[1] * 0.9, f'Mean: {mean_val:.3f}', rotation=90, verticalalignment='bottom')
+                plt.text(max_val, ylim[1] * 0.8, f'Max: {max_val:.3f}', rotation=90, verticalalignment='bottom')
+                plt.text(0, ylim[1] * 0.7, '0', rotation=90, verticalalignment='bottom')
 
                 plt.legend()
                 plt.title(f"strain number: {strain}, day: {t}, rank: {rank}")
@@ -137,7 +129,7 @@ if __name__ == '__main__':
                 plt.subplot(1, 2, 2)
                 beneficial_dfe_t = [x for x in dfe_t if x > 0]
                 if len(beneficial_dfe_t) > 0:
-                    counts, bins, _ = plt.hist(beneficial_dfe_t, bins=args.n_bins, density=True, alpha=0.6, label='Beneficial tail')
+                    counts_ben, bins_ben, _ = plt.hist(beneficial_dfe_t, bins=args.n_bins, density=True, alpha=0.6, label='Beneficial tail')
                     kde_beneficial = gaussian_kde(beneficial_dfe_t, bw_method='silverman')
                     x_beneficial = np.linspace(min(beneficial_dfe_t), max(beneficial_dfe_t), 1000)
                     kde_beneficial_values = kde_beneficial(x_beneficial)
