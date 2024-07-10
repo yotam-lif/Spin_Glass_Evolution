@@ -3,6 +3,7 @@
 # Load necessary modules
 module load Python/3.10.8-GCCcore-12.2.0
 module load matplotlib/3.7.0-gfbf-2022b
+module load numpy/1.24.2-GCCcore-12.2.0
 
 # Delete previous output files
 rm out_graph.txt err_graph.txt
