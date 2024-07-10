@@ -63,7 +63,7 @@ if __name__ == '__main__':
             for t in times:
                 mut_order_strain_t = dfe.build_mut_series_t(mut_order[strain], mut_times[strain], t)
                 alpha = dfe.build_alpha(alpha0s, mut_order_strain_t)
-                dfe_t = dfe.compute_dfe(alpha, his, Jijs, args.beneficial)
+                dfe_t = dfe.compute_dfe(alpha, his, Jijs)
                 dfes_strain.append(dfe_t)
             dfes.append(dfes_strain)
         # The first element in dfes is the "dominant strain" DFE
@@ -147,8 +147,10 @@ if __name__ == '__main__':
                     expected_beneficial = exponential_pdf(x_beneficial, _lambda)
                     chi_squared_beneficial = round(sum((observed_beneficial - expected_beneficial) ** 2 / expected_beneficial), 2)
 
-                    # Annotate the chi-squared value on the plot
+                    # Annotate the chi-squared value and lambda on the plot
                     plt.text(0.95, 0.95, f'Chi squared: {chi_squared_beneficial}', transform=plt.gca().transAxes,
+                             verticalalignment='top', horizontalalignment='right')
+                    plt.text(0.95, 0.90, f'λ: {_lambda:.2f}', transform=plt.gca().transAxes,
                              verticalalignment='top', horizontalalignment='right')
 
                     plt.legend()

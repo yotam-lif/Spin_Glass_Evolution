@@ -328,7 +328,7 @@ def build_alpha(alpha0, mut_series):
     return alpha
 
 
-def compute_dfe(alpha: np.ndarray, hi: np.ndarray, Jij: np.ndarray, ben: bool = False):
+def compute_dfe(alpha: np.ndarray, hi: np.ndarray, Jij: np.ndarray):
     """
     Computes the distribution of fitness effects for a given genome alpha.
 
@@ -346,8 +346,6 @@ def compute_dfe(alpha: np.ndarray, hi: np.ndarray, Jij: np.ndarray, ben: bool = 
     for k in range(alpha.size):
         delta_fit_k = compute_fitness_delta_mutant(alpha, hi, Jalpha, k)
         dfe.append(delta_fit_k)
-    if ben:
-        dfe = [x for x in dfe if x >= 0]
     return dfe
 
 
