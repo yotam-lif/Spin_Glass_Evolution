@@ -112,13 +112,12 @@ if __name__ == '__main__':
                 max_val = bins[max_index]
                 plt.axvline(mean_val, color='k', linestyle='dashed', linewidth=1)
                 plt.axvline(max_val, color='r', linestyle='dashed', linewidth=1)
-                plt.axvline(0, color='g', linestyle='dashed', linewidth=1)
+                plt.axvline(0, color='orange', linestyle='dashed', linewidth=1)
 
                 # Annotate the vertical lines
                 ylim = plt.ylim()
-                plt.text(mean_val, ylim[1] * 0.9, f'Mean: {mean_val:.3f}', rotation=90, verticalalignment='bottom')
-                plt.text(max_val, ylim[1] * 0.8, f'Max: {max_val:.3f}', rotation=90, verticalalignment='bottom')
-                plt.text(0, ylim[1] * 0.7, '0', rotation=90, verticalalignment='bottom')
+                plt.text(mean_val, ylim[1] * 0.1, f'Mean: {mean_val:.2f}', rotation=90, verticalalignment='bottom')
+                plt.text(max_val, ylim[1] * 0.1, f'Max: {max_val:.2f}', rotation=90, verticalalignment='bottom')
 
                 plt.legend()
                 plt.title(f"strain number: {strain}, day: {t}, rank: {rank}")
