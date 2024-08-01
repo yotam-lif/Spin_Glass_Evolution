@@ -128,7 +128,7 @@ if __name__ == '__main__':
                 plt.subplot(1, 2, 2)
                 beneficial_dfe_t = [x for x in dfe_t if x > 0]
                 if len(beneficial_dfe_t) > 0:
-                    counts_ben, bins_ben, _ = plt.hist(beneficial_dfe_t, bins=args.n_bins, density=True, alpha=0.6, label='Beneficial tail')
+                    counts_ben, bins_ben, _ = plt.hist(beneficial_dfe_t, bins=int(args.n_bins/2), density=True, alpha=0.6, label='Beneficial tail')
                     kde_beneficial = gaussian_kde(beneficial_dfe_t, bw_method='silverman')
                     x_beneficial = np.linspace(min(beneficial_dfe_t), max(beneficial_dfe_t), 1000)
                     kde_beneficial_values = kde_beneficial(x_beneficial)
@@ -147,9 +147,9 @@ if __name__ == '__main__':
                     chi_squared_beneficial = round(sum((observed_beneficial - expected_beneficial) ** 2 / expected_beneficial), 2)
 
                     # Annotate the chi-squared value and lambda on the plot
-                    plt.text(0.95, 0.95, f'Chi squared: {chi_squared_beneficial}', transform=plt.gca().transAxes,
+                    plt.text(0.95, 0.5, f'Chi squared: {chi_squared_beneficial}', transform=plt.gca().transAxes,
                              verticalalignment='top', horizontalalignment='right')
-                    plt.text(0.95, 0.90, f'λ: {_lambda:.2f}', transform=plt.gca().transAxes,
+                    plt.text(0.95, 0.5, f'λ: {_lambda:.2f}', transform=plt.gca().transAxes,
                              verticalalignment='top', horizontalalignment='right')
 
                     plt.legend()
