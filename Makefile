@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -fopenmp -g -Wno-long-long -Wall -lm -pedantic -std=c++17
+CXXFLAGS = -fopenmp -g -Wno-long-long -Wall -lm -pedantic -std=c++14
 CXXFLAGS += -O3
 
 # Use environment variables for include and library paths
