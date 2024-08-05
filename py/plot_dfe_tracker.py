@@ -103,7 +103,8 @@ if __name__ == '__main__':
     parser.add_argument('bins', type=int, default=30, help='n_bins for histogram')
     parser.add_argument('border', type=float, default=0.0, help='Scales x axis of histograms')
     parser.add_argument('dir_name', type=str, help='Name of directory data is in')
-    parser.add_argument('dfe_days', nargs='*', type=int, default=[0], help='Days for DFE')
+    parser.add_argument('init_day', type=int, default=0, help='Initial day for tracking')
+    parser.add_argument('dfe_days_increments', nargs='*', type=int, default=[0], help='Days for DFE as increments from init_day')
     args = parser.parse_args()
 
     # Determine the path to the current script
@@ -114,8 +115,8 @@ if __name__ == '__main__':
     dir_name = args.dir_name
     main_dir = os.path.join(base_dir, 'dfe_tracker_plots_' + dir_name)
     os.makedirs(main_dir, exist_ok=True)
-    times = [0]  # We always want to track the DFE at day 0
-    times.extend(args.dfe_days)  # Add the days we want to track the DFE for
+    times = [args.init_day]
+    times.extend(args.dfe_days_increments)  # Add the days we want to track the DFE for
     bins = args.bins
     for i in range(args.n_exps):
         # Pull data

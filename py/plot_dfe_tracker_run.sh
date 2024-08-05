@@ -19,8 +19,8 @@ echo "Python executable: $(which python)" >> out_dfe_track.txt
 echo "Python version: $(python --version)" >> out_dfe_track.txt
 echo "Python path: $(python -c 'import sys; print(sys.path)')" >> out_dfe_track.txt
 
-# Run the Python script with arguments nexps, nsamples, nbins, border, dir_name, [times]
-python plot_dfe_tracker.py 2 1 18 0.0045 "lenski_data" 100 300 500 900 >> out_dfe_track.txt 2>> err_dfe_track.txt
+# Run the Python script with arguments nexps, nsamples, nbins, border, dir_name, init_day, [times]
+python plot_dfe_tracker.py 1 1 20 0 "lenski_data_scramble" 0 100 300 500 900 >> out_dfe_track.txt 2>> err_dfe_track.txt
 
 # Check if the script ran successfully
 if [ $? -eq 0 ]; then
