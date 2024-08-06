@@ -115,15 +115,16 @@ if __name__ == '__main__':
     dir_name = args.dir_name
     main_dir = os.path.join(base_dir, 'dfe_tracker_plots_' + dir_name)
     os.makedirs(main_dir, exist_ok=True)
-    times = [args.init_day]
+    times = [0]
     times.extend(args.dfe_days_increments)  # Add the days we want to track the DFE for
+    times = [t+args.init_day for t in times]    # Add the initial day
     bins = args.bins
     for i in range(args.n_exps):
         # Pull data
         alpha0s, his, Jijs = dfe.pull_env(i, dir_name)
         Jijs = dfe.load_Jijs(Jijs, alpha0s.size, dir_name)
         mut_order, mut_times, _ = dfe.pull_mut_hist(i, dir_name)
-        # dfes will hold the dfe data for each strain at deisgnated times
+        # dfes will hold the dfe data for each strain at designated times
         # len(dfes) = n_samples
         dfes = []
         # Then add strains we chose to track lineages for
@@ -163,7 +164,7 @@ if __name__ == '__main__':
                 fig = plt.figure(figsize=(12, 6))
 
                 # Remove the n_remove largest values from the data to make the plot more readable
-                n_remove = 5
+                n_remove = 1
                 bdfe_t_fits = dfe.remove_n_largest(bdfe_t_fits, n_remove)
                 propagated_bdfe_t = dfe.remove_n_largest(propagated_bdfe_t, n_remove)
                 bdfe_0_fits = dfe.remove_n_largest(bdfe_0_fits, n_remove)

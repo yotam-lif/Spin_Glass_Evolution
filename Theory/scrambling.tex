@@ -1,0 +1,163 @@
+%% LyX 2.4.1 created this file.  For more info, see https://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[american]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{babel}
+\begin{document}
+\title{Scrambling in the Spin-Glass Evolution Simulation}
+
+\maketitle
+Observe the ``scrambling'' effect in the simulation.
+
+Say we define some initial time $t_{0}$ and time variable $t$ that
+starts from $t_{0}$.
+
+Remember $\vec{\alpha}$ is the binary genome vector, $\hat{J}$ is
+the epistatic matrix.
+
+\[
+F(\vec{\alpha})=\sum_{i=1}^{L}h_{i}\alpha_{i}+\sum_{i,j=1}^{L}\alpha_{i}J_{ij}\alpha_{j}
+\]
+
+And the fitness effect of flipping $\alpha_{i}\rightarrow-\alpha_{i}$:
+
+\[
+\Delta_{i}=-2\alpha_{i}\left(h_{i}+\sum_{j=1}^{L}J_{ij}\alpha_{j}\right)
+\]
+
+Define the local field $f_{i}$:
+
+\[
+f_{i}:=\sum_{j=1}^{L}J_{ij}\alpha_{j}
+\]
+
+fig:t_0=1000001
+\[
+F(\vec{\alpha})=\sum_{i=1}^{L}(h_{i}+f_{i})\alpha_{i}
+\]
+
+\[
+\Delta_{i}=-2\alpha_{i}\left(h_{i}+f_{i}\right)\approx-2\alpha_{i}f_{i}
+\]
+
+Where we disregard the $h_{i}$ for this effect, as we assume it happens
+for $\beta\approx1$.
+
+Define ``Forward DFE'' or ``Forward propagation'' the act of taking
+the beneficial DFE (BDFE) at time $t_{0}$, and observing the genes
+responsible for this distribution (these would be the genes that have
+$\alpha_{i}f_{i}<0$). Propagate the system to time $t$, and plot
+the distribution of fitness effects of these same genes. Are they
+still all beneficial, or perhaps the distribution changes?
+
+The same can be defined as ``Backward DFE'' or ``Backward propagation''.
+Take the BDFE at time $t$ and propagate the system back to time $t_{0}$,
+and observe the distribution of fitness effects of the genes responsible
+for the BDFE at $t_{0}$. 
+
+We plot the propagations for $t_{0}=0$ (\ref{fig:t_0=00003D0}) and
+for $t_{0}=1+10^{6}$ (\ref{fig:t_0=00003D1000001}). 
+\begin{figure}
+\begin{centering}
+\includegraphics[scale=0.4]{/Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_0}
+\par\end{centering}
+\begin{centering}
+\includegraphics[scale=0.4]{/Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_200000}
+\par\end{centering}
+\begin{centering}
+\includegraphics[scale=0.4]{/Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_3000000}
+\par\end{centering}
+\caption{ Forward and backward propagations for $t_{0}=0,$ $t=[0,2\cdot10^{5},3\cdot10^{6}].$
+We can observe the slow evolution of the propagated DFEs into what
+seems to be a gaussian.}\label{fig:t_0=00003D0}
+
+\end{figure}
+
+\begin{figure}
+\begin{centering}
+\includegraphics[scale=0.4]{/Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_1000001}
+\par\end{centering}
+\begin{centering}
+\includegraphics[scale=0.4]{/Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_1500001}
+\par\end{centering}
+\begin{centering}
+\includegraphics[scale=0.4]{/Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_4000001}
+\par\end{centering}
+\caption{ Forward and backward propagations for $t_{0}=1+10^{6},$ $t=[1+10^{6},1+15\cdot10^{5},1+4\cdot10^{6}].$
+We can observe the slow evolution of the propagated DFEs into what
+seems to be a gaussian. Timescale is larger than before because of
+diminishing magnitude of incorporated fitness effects, leading to
+larger fixation times.}\label{fig:t_0=00003D1000001}
+\end{figure}
+So it seems the value of $t_{0}$ doesn't change this effect. We shall
+immediately attempt to analyze this effect, but beforehand we must
+state the obvious -
+
+It must be that this Gaussian is a transitionary effect, and such
+is the one observed in Bayms paper as well. I say this because it
+is obvious that the BDFE loses it's meaning / distribution nature
+when we approach a local fitness peak and there are almost no beneficial
+distribution effects left. Thus, we must think of this creature in
+the right regimes of existence.
+
+Now, to analyze:
+
+\[
+\Delta_{i}=-2\alpha_{i}\left(h_{i}+f_{i}\right)\approx-2\alpha_{i}f_{i}
+\]
+
+Define $N_{+}(t)$ as the number of $\alpha_{i}=+1$ at time $t$
+and $N_{-}(t)=L-N_{+}(t)$ the number of $\alpha_{i}=-1.$
+
+$\Delta_{i}$ are the fitness effects. If we look at the BDFE, we
+are \textbf{conditioning on $i$ s.t} $\Delta_{i}>0$, i.e. $\alpha_{i}f_{i}<0$.
+Observe that in general and regardless of time there exists a symmetry
+of $J_{ij},h_{i}$ in the system around $0$, thus we assume $N_{+}(t)\approx N_{-}(t)$
+regardless of $t$.
+
+The only thing that changes is that $\alpha_{i}$ flip to match their
+$f_{i}$. But, when we condition on $\Delta_{i}>0$ we choose the
+$i$s s.t their $f_{i}$ are the ones that this symmetry is broken
+in a way that $f_{i}\neq0$ , and in particular $sign(f_{i})\neq sign(\alpha_{i}).$ 
+
+For instance, if $\alpha_{i}<0$ and the fitness effect of gene $i$
+is beneficial, this means $f_{i}=\sum_{j=1}^{L}J_{ij}\alpha_{j}>0$
+and in particular, considering $N_{+}(t)\approx N_{-}(t)$, it must
+be that specifically for row $i$ we have an untypical amount of $J_{ij}$
+that have the same sign as $\alpha_{j}$.
+
+Evolving in time, we assume this randomly flips $\alpha_{j}$. We
+had more terms of $J_{ij}\alpha_{j}>0$ than $J_{ij}\alpha_{j}<0$
+for the above example, such that flipping $\alpha_{j}$ more likely
+evens out the sum such that there roughly the same number of $J_{ij}\alpha_{j}>0$
+as $J_{ij}\alpha_{j}<0$.
+
+Observe that now, for large $L\rho$ and an unbiased sum:
+
+\[
+f_{i}:=\sum_{j=1}^{L}J_{ij}\alpha_{j}\approx\sum_{j=1}^{L}J_{ij}\rightarrow X_{i}\sim N(0,\sigma_{J}\sqrt{L\rho})
+\]
+
+Where we assumed that for the now unbiased sum, randomly flipping
+the signs of $J_{ij}$ does not change the result because they are
+drawn from a normal distribution. 
+
+So we assume that from the CLT, $f_{i}$ becomes a normally distributed
+RV. 
+
+Because we have:
+
+\[
+\Delta_{i}\approx-2\alpha_{i}f_{i}
+\]
+
+The other terms can, at most, flip the sign of $f_{i}$. So we see
+that the DFE is the distribution of $f_{i}$s who are perhaps flipped,
+which does not change the distribution as they are normally distributed
+RVs.
+
+This can explain perhaps the ``scrambling'' effect we observe in
+the simulation, and that which is observed in Bayms paper.
+\end{document}

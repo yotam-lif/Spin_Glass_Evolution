@@ -1,0 +1,1203 @@
+#LyX 2.4 created this file. For more info see https://www.lyx.org/
+\lyxformat 620
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children no
+\language american
+\language_package default
+\inputencoding utf8
+\fontencoding auto
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_roman_osf false
+\font_sans_osf false
+\font_typewriter_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement class
+\float_alignment class
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_formatted_ref 0
+\use_minted 0
+\use_lineno 0
+\index Index
+\shortcut idx
+\color #008080
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip halfline
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tablestyle default
+\tracking_changes false
+\output_changes false
+\change_bars false
+\postpone_fragile_content true
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\docbook_table_output 0
+\docbook_mathml_prefix 1
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Scrambling in the Spin-Glass Evolution Simulation
+\end_layout
+
+\begin_layout Standard
+\align left
+Observe the 
+\begin_inset Quotes eld
+\end_inset
+
+scrambling
+\begin_inset Quotes erd
+\end_inset
+
+ effect in the simulation.
+ Say we define some initial time 
+\begin_inset Formula $t_{0}$
+\end_inset
+
+ and time variable 
+\begin_inset Formula $t$
+\end_inset
+
+ that starts from 
+\begin_inset Formula $t_{0}$
+\end_inset
+
+.
+ Remember 
+\begin_inset Formula $\vec{\alpha}$
+\end_inset
+
+ is the binary genome vector,
+ 
+\begin_inset Formula $\hat{J}$
+\end_inset
+
+ is the epistatic matrix.
+\end_layout
+
+\begin_layout Standard
+\align left
+\begin_inset Formula 
+\[
+F(\vec{\alpha})=\sum_{i=1}^{L}h_{i}\alpha_{i}+\sum_{i,j=1}^{L}\alpha_{i}J_{ij}\alpha_{j}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align left
+And the fitness effect of flipping 
+\begin_inset Formula $\alpha_{i}\rightarrow-\alpha_{i}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\align left
+\begin_inset Formula 
+\[
+\Delta_{i}=-2\alpha_{i}\left(h_{i}+\sum_{j=1}^{L}J_{ij}\alpha_{j}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align left
+Define the local field 
+\begin_inset Formula $f_{i}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\align left
+\begin_inset Formula 
+\[
+f_{i}:=\sum_{j=1}^{L}J_{ij}\alpha_{j}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align left
+\begin_inset Formula 
+\[
+F(\vec{\alpha})=\sum_{i=1}^{L}(h_{i}+f_{i})\alpha_{i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align left
+\begin_inset Formula 
+\[
+\Delta_{i}=-2\alpha_{i}\left(h_{i}+f_{i}\right)\approx-2\alpha_{i}f_{i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align left
+Where we disregard the 
+\begin_inset Formula $h_{i}$
+\end_inset
+
+ for this effect,
+ as we assume it happens for 
+\begin_inset Formula $\beta\approx1$
+\end_inset
+
+.
+ Define 
+\begin_inset Quotes eld
+\end_inset
+
+Forward DFE
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+Forward propagation
+\begin_inset Quotes erd
+\end_inset
+
+ the act of taking the beneficial DFE (BDFE) at time 
+\begin_inset Formula $t_{0}$
+\end_inset
+
+,
+ and observing the genes responsible for this distribution (these would be the genes that have 
+\begin_inset Formula $\alpha_{i}f_{i}<0$
+\end_inset
+
+).
+ Propagate the system to time 
+\begin_inset Formula $t$
+\end_inset
+
+,
+ and plot the distribution of fitness effects of these same genes.
+ Are they still all beneficial,
+ or perhaps the distribution changes?
+ The same can be defined as 
+\begin_inset Quotes eld
+\end_inset
+
+Backward DFE
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+Backward propagation
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Take the BDFE at time 
+\begin_inset Formula $t$
+\end_inset
+
+ and propagate the system back to time 
+\begin_inset Formula $t_{0}$
+\end_inset
+
+,
+ and observe the distribution of fitness effects of thees genes at 
+\begin_inset Formula $t_{0}$
+\end_inset
+
+.
+ We plot the propagations for 
+\begin_inset Formula $t_{0}=0$
+\end_inset
+
+ 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "fig:t_0=0"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+ and for 
+\begin_inset Formula $t_{0}=1+10^{6}$
+\end_inset
+
+ 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "fig:t_0=1000001"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+.
+ 
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_0.png
+	lyxscale 40
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_200000.png
+	lyxscale 40
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_3000000.png
+	lyxscale 40
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:t_0=0"
+
+\end_inset
+
+ Forward and backward propagations for 
+\begin_inset Formula $t_{0}=0,$
+\end_inset
+
+ 
+\begin_inset Formula $t=[0,2\cdot10^{5},3\cdot10^{6}].$
+\end_inset
+
+ We can observe the slow evolution of the propagated DFEs into what seems to be a gaussian.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align left
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_1000001.png
+	lyxscale 40
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_1500001.png
+	lyxscale 40
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_4000001.png
+	lyxscale 40
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:t_0=1000001"
+
+\end_inset
+
+ Forward and backward propagations for 
+\begin_inset Formula $t_{0}=1+10^{6},$
+\end_inset
+
+ 
+\begin_inset Formula $t=[1+10^{6},1+15\cdot10^{5},1+4\cdot10^{6}].$
+\end_inset
+
+ Timescale is larger because of diminishing magnitude of fixated fitness effects,
+ leading to larger fixation times.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+So,
+ it seems the value of 
+\begin_inset Formula $t_{0}$
+\end_inset
+
+ doesn't change this effect.
+ We shall immediately attempt to analyze this effect,
+ but beforehand we must state the obvious - It must be that this Gaussian is a transitionary effect,
+ and such is the one observed in Bayms paper as well.
+ I say this because it is obvious that the BDFE loses its meaning/nature when we approach a local fitness peak and there are almost no beneficial distribution effects left.
+ Thus,
+ we must think of this creature in the right regimes of existence.
+ Now,
+ to analyze:
+\end_layout
+
+\begin_layout Standard
+\align left
+\begin_inset Formula 
+\[
+\Delta_{i}=-2\alpha_{i}\left(h_{i}+f_{i}\right)\approx-2\alpha_{i}f_{i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align left
+Define 
+\begin_inset Formula $N_{+}(t)$
+\end_inset
+
+ as the number of 
+\begin_inset Formula $\alpha_{i}=+1$
+\end_inset
+
+ at time 
+\begin_inset Formula $t$
+\end_inset
+
+ and 
+\begin_inset Formula $N_{-}(t)=L-N_{+}(t)$
+\end_inset
+
+ the number of 
+\begin_inset Formula $\alpha_{i}=-1.$
+\end_inset
+
+ 
+\begin_inset Formula $\Delta_{i}$
+\end_inset
+
+ are the fitness effects.
+ If we look at the BDFE,
+ we are 
+\series bold
+conditioning on 
+\begin_inset Formula $i$
+\end_inset
+
+ s.t
+\series default
+ 
+\begin_inset Formula $\Delta_{i}>0$
+\end_inset
+
+,
+ i.e.
+ 
+\begin_inset Formula $\alpha_{i}f_{i}<0$
+\end_inset
+
+.
+ Observe that in general and regardless of time there exists a symmetry of 
+\begin_inset Formula $J_{ij},h_{i}$
+\end_inset
+
+ in the system around 
+\begin_inset Formula $0$
+\end_inset
+
+,
+ thus we assume 
+\begin_inset Formula $N_{+}(t)\approx N_{-}(t)$
+\end_inset
+
+ ,
+ regardless of 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ The only thing that changes is that 
+\begin_inset Formula $\alpha_{i}$
+\end_inset
+
+ flip to match their corresponding 
+\begin_inset Formula $f_{i}$
+\end_inset
+
+ ,
+ and 
+\begin_inset Formula $+\rightarrow-$
+\end_inset
+
+ as much as 
+\begin_inset Formula $-\rightarrow+$
+\end_inset
+
+.
+ But,
+ when we condition on 
+\begin_inset Formula $\Delta_{i}>0$
+\end_inset
+
+ we choose the 
+\begin_inset Formula $i$
+\end_inset
+
+ s.t their 
+\begin_inset Formula $f_{i}$
+\end_inset
+
+ are the ones that this symmetry is broken in a way that 
+\begin_inset Formula $f_{i}\neq0$
+\end_inset
+
+ ,
+ and in particular 
+\begin_inset Formula $sign(f_{i})\neq sign(\alpha_{i}).$
+\end_inset
+
+ For example,
+ if 
+\begin_inset Formula $\alpha_{i}<0$
+\end_inset
+
+ and the fitness effect of gene 
+\begin_inset Formula $i$
+\end_inset
+
+ is beneficial,
+ this means 
+\begin_inset Formula $f_{i}=\sum_{j=1}^{L}J_{ij}\alpha_{j}>0$
+\end_inset
+
+ ,
+ and in particular,
+ considering 
+\begin_inset Formula $N_{+}(t)\approx N_{-}(t)$
+\end_inset
+
+ ,
+ it must be that specifically for row 
+\begin_inset Formula $i$
+\end_inset
+
+ we have and/or:
+\end_layout
+
+\begin_layout Enumerate
+\align left
+We have an untypical amount of 
+\begin_inset Formula $J_{ij}$
+\end_inset
+
+ that have the same sign as 
+\begin_inset Formula $\alpha_{i}\alpha_{j}$
+\end_inset
+
+.
+ Name this 
+\begin_inset Quotes eld
+\end_inset
+
+quantity skew
+\begin_inset Quotes erd
+\end_inset
+
+.
+ We will use the name later.
+\end_layout
+
+\begin_layout Enumerate
+\align left
+We have that 
+\begin_inset Formula $\alpha_{i}\alpha_{j}$
+\end_inset
+
+ are the same sign as 
+\begin_inset Formula $J_{ij}$
+\end_inset
+
+ for the largest values of 
+\begin_inset Formula $J_{ij}$
+\end_inset
+
+.
+ Name this 
+\begin_inset Quotes eld
+\end_inset
+
+quality skew
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\align left
+Now we assume that evolving in time randomly flips 
+\begin_inset Formula $\alpha_{j}$
+\end_inset
+
+ ,
+ at least as far as 
+\begin_inset Formula $f_{i}$
+\end_inset
+
+ are concerned.
+ For 
+\begin_inset Formula $f_{i}>0$
+\end_inset
+
+ we had for the above example more terms of 
+\begin_inset Formula $J_{ij}\alpha_{j}>0$
+\end_inset
+
+ than 
+\begin_inset Formula $J_{ij}\alpha_{j}<0$
+\end_inset
+
+ .
+ In this case,
+ flipping random 
+\begin_inset Formula $\alpha_{j}$
+\end_inset
+
+ more likely 
+\begin_inset Quotes eld
+\end_inset
+
+evens out
+\begin_inset Quotes erd
+\end_inset
+
+ the sum,
+ such that there roughly the same number of 
+\begin_inset Formula $J_{ij}\alpha_{j}>0$
+\end_inset
+
+ as 
+\begin_inset Formula $J_{ij}\alpha_{j}<0$
+\end_inset
+
+.
+ Observe that now,
+ for large 
+\begin_inset Formula $L\rho$
+\end_inset
+
+ and an unbiased sum:
+\end_layout
+
+\begin_layout Standard
+\align left
+\begin_inset Formula 
+\[
+f_{i}:=\sum_{j=1}^{L}J_{ij}\alpha_{j}\approx\sum_{j=1}^{L}J_{ij}\rightarrow X_{i}\sim N(0,\sigma_{J}\sqrt{L\rho})
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align left
+Where we assumed that for the now 
+\begin_inset Quotes eld
+\end_inset
+
+unbiased
+\begin_inset Quotes erd
+\end_inset
+
+ sum,
+ randomly flipping the signs of 
+\begin_inset Formula $J_{ij}$
+\end_inset
+
+ by multiplying with 
+\begin_inset Formula $\alpha_{j}$
+\end_inset
+
+ does not change the result,
+ because 
+\begin_inset Formula $J_{ij}$
+\end_inset
+
+ are drawn from a normal distribution.
+ So,
+ we see that via the CLT,
+ 
+\begin_inset Formula $f_{i}$
+\end_inset
+
+ becomes a normally distributed RV.
+ Now,
+ because we have:
+\end_layout
+
+\begin_layout Standard
+\align left
+\begin_inset Formula 
+\[
+\Delta_{i}\approx-2\alpha_{i}f_{i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align left
+The other terms can,
+ at most,
+ flip the sign of 
+\begin_inset Formula $f_{i}$
+\end_inset
+
+.
+ So,
+ we see that the DFE is the distribution of 
+\begin_inset Formula $f_{i}$
+\end_inset
+
+ who are perhaps flipped,
+ which does not change the distribution as they are normally distributed RVs.
+ This can perhaps explain the 
+\begin_inset Quotes eld
+\end_inset
+
+scrambling
+\begin_inset Quotes erd
+\end_inset
+
+ effect we observe in the simulation,
+ and that which is observed in Bayms paper.
+\end_layout
+
+\begin_layout Standard
+To Emphasize this point I did the following simulation:
+\end_layout
+
+\begin_layout Enumerate
+Save the set of genes that have beneficial fitness effects at 
+\begin_inset Formula $t_{0}$
+\end_inset
+
+,
+ call them the set 
+\begin_inset Formula $G_{0}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Define 
+\begin_inset Formula $N_{+}^{i}$
+\end_inset
+
+the number of positive elements in the sum 
+\begin_inset Formula $\sum_{j=1}^{L}-2\alpha_{i}J_{ij}\alpha_{j}=-2\alpha_{i}f_{i}=\Delta_{i}$
+\end_inset
+
+ ,
+ which basically quantifies the 
+\begin_inset Quotes eld
+\end_inset
+
+quantity skew
+\begin_inset Quotes erd
+\end_inset
+
+ as defined above.
+\end_layout
+
+\begin_layout Enumerate
+For a general 
+\begin_inset Formula $i$
+\end_inset
+
+ we we expect 
+\begin_inset Formula $\frac{N_{+}^{i}}{\rho L}\approx0.5$
+\end_inset
+
+ ,
+ but for 
+\begin_inset Formula $i\in G_{0}$
+\end_inset
+
+ we expect more!
+\end_layout
+
+\begin_layout Enumerate
+Now plot the averaged 
+\begin_inset Formula $\frac{N_{+}^{i}}{\rho L}-\frac{1}{2}$
+\end_inset
+
+ for 
+\begin_inset Formula $i\in G_{0}$
+\end_inset
+
+ (averaged over 
+\begin_inset Formula $G_{0}$
+\end_inset
+
+) to quantify this 
+\begin_inset Quotes eld
+\end_inset
+
+quantity skewness
+\begin_inset Quotes erd
+\end_inset
+
+ over time.
+\end_layout
+
+\begin_layout Enumerate
+Do it for different 
+\begin_inset Formula $t_{0}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+We plot exactly this for 
+\begin_inset Formula $2$
+\end_inset
+
+ different clones,
+ the first from 
+\begin_inset Formula $t_{0}=0$
+\end_inset
+
+ to 
+\begin_inset Formula $t=1\cdot10^{6}$
+\end_inset
+
+ 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "N_plus_0_1e6"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+ and the second from 
+\begin_inset Formula $t_{0}=1\cdot10^{6}$
+\end_inset
+
+ to 
+\begin_inset Formula $t=4\cdot10^{6}$
+\end_inset
+
+ 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "N_plus_1E6_4E6"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+ (same times as plotted above).
+ We can observe what seems to be the same kind of (exponential?) decay for the number of untypically aligned members regardless of 
+\begin_inset Formula $t_{0}$
+\end_inset
+
+!
+\end_layout
+
+\begin_layout Standard
+So,
+ to summarize:
+\end_layout
+
+\begin_layout Standard
+Observing the BDFE,
+ we condition on the fact that 
+\begin_inset Formula $\Delta_{i}$
+\end_inset
+
+,
+ the fitness effects of mutation in these genes,
+ will be 
+\begin_inset Formula $>0$
+\end_inset
+
+,
+ and this is true regardless of 
+\begin_inset Formula $t_{0}$
+\end_inset
+
+ because this is the definition of the BDFE.
+ Simplified,
+ this means that for given gene 
+\begin_inset Formula $i$
+\end_inset
+
+,
+ we have an untypical amount(defined as 
+\begin_inset Formula $N_{+}$
+\end_inset
+
+) of 
+\begin_inset Formula $J_{ij}\alpha_{j}$
+\end_inset
+
+ such that 
+\begin_inset Formula $sign(\alpha_{i})=sign(J_{ij}\alpha_{j})$
+\end_inset
+
+.
+ This amount is typically just 
+\begin_inset Formula $1/2$
+\end_inset
+
+,
+ but not for 
+\begin_inset Formula $i\in G_{0}$
+\end_inset
+
+.
+ During evolution,
+ 
+\begin_inset Formula $\alpha_{j}$
+\end_inset
+
+ flip randomly(at least randomly from the POV of row 
+\begin_inset Formula $i$
+\end_inset
+
+ of 
+\begin_inset Formula $J_{ij}$
+\end_inset
+
+),
+ and 
+\begin_inset Formula $N_{+}/\rho L\rightarrow1/2$
+\end_inset
+
+.
+ In other words,
+ mutations 
+\begin_inset Quotes eld
+\end_inset
+
+randomly
+\begin_inset Quotes erd
+\end_inset
+
+ become beneficial,
+ but their autocorrelation function decays in time.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/n_plus_0_1000000.png
+	lyxscale 40
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate1/strain_lineage_0/n_plus_0_1000000.png
+	lyxscale 40
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "N_plus_0_1e6"
+
+\end_inset
+
+ We plot 
+\begin_inset Formula $N_{+}/\rho L-1/2$
+\end_inset
+
+ for 
+\begin_inset Formula $2$
+\end_inset
+
+ different clone evolutions,
+ from 
+\begin_inset Formula $t_{0}=0$
+\end_inset
+
+ to 
+\begin_inset Formula $t=10^{6}$
+\end_inset
+
+.
+ Decay can be observed.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/n_plus_1000000_4000000.png
+	lyxscale 40
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate1/strain_lineage_0/n_plus_1000000_4000000.png
+	lyxscale 40
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "N_plus_1E6_4E6"
+
+\end_inset
+
+ We plot 
+\begin_inset Formula $N_{+}/\rho L-1/2$
+\end_inset
+
+ for 
+\begin_inset Formula $2$
+\end_inset
+
+ different clone evolutions,
+ from 
+\begin_inset Formula $t_{0}=1\cdot10^{6}$
+\end_inset
+
+ to 
+\begin_inset Formula $t=4\cdot10^{6}$
+\end_inset
+
+.
+ Decay can be observed.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
