@@ -1196,7 +1196,26 @@ name "N_plus_1E6_4E6"
 
 \end_inset
 
+Where does the symmetry break between the BDFE and the DDFE?
+ Would this behavior be the same for deleterious mutations as well?
+ Needs checking,
+ but I think not.
+ Why?
+\end_layout
 
+\begin_layout Standard
+Something to do with selection perhaps.
+ We bias on 
+\begin_inset Formula $\Delta_{i}<0$
+\end_inset
+
+ and everything is the same as above,
+ but we don't expect many flips of 
+\begin_inset Formula $\alpha_{j}$
+\end_inset
+
+ in this row perhaps as to even out the sum because mutations are deleterious...
+ something like this.
 \end_layout
 
 \end_body
