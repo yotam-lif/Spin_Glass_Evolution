@@ -1,1 +1,1 @@
-ssh yotamlif@accessv02.wexac.weizmann.ac.il
+ssh yotamlif@accessv01.wexac.weizmann.ac.il
