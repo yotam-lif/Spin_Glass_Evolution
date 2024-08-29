@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     # Determine the base directory of the script
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    main_dir = os.path.join(base_dir, 'dfe_plots_' + args.dir_name)
+    main_dir = os.path.join(base_dir, args.dir_name, 'dfe_plots')
     os.makedirs(main_dir, exist_ok=True)
     times = args.dfe_days
 
