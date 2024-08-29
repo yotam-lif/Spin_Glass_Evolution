@@ -72,7 +72,7 @@ if __name__ == '__main__':
     base_dir = os.path.dirname(os.path.dirname(current_script_path))
     # Create the main directory if it doesn't exist
     dir_name = args.dir_name
-    main_dir = os.path.join(base_dir, f'dfe_tracker_plots_{dir_name}')
+    main_dir = os.path.join(base_dir, dir_name, 'n_plus_plots')
     os.makedirs(main_dir, exist_ok=True)
     days = args.final_day - args.init_day
     time_steps = int(days * args.density) + 1

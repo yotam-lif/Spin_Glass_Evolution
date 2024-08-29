@@ -287,209 +287,12 @@ Backward propagation
 \end_inset
 
 ,
- and observe the distribution of fitness effects of thees genes at 
+ and observe the distribution of fitness effects of these genes at 
 \begin_inset Formula $t_{0}$
 \end_inset
 
 .
- We plot the propagations for 
-\begin_inset Formula $t_{0}=0$
-\end_inset
-
- 
-\begin_inset CommandInset ref
-LatexCommand eqref
-reference "fig:t_0=0"
-plural "false"
-caps "false"
-noprefix "false"
-nolink "false"
-
-\end_inset
-
- and for 
-\begin_inset Formula $t_{0}=1+10^{6}$
-\end_inset
-
- 
-\begin_inset CommandInset ref
-LatexCommand eqref
-reference "fig:t_0=1000001"
-plural "false"
-caps "false"
-noprefix "false"
-nolink "false"
-
-\end_inset
-
-.
- 
-\begin_inset Float figure
-placement document
-alignment document
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_0.png
-	lyxscale 40
-	scale 40
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_200000.png
-	lyxscale 40
-	scale 40
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_3000000.png
-	lyxscale 40
-	scale 40
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:t_0=0"
-
-\end_inset
-
- Forward and backward propagations for 
-\begin_inset Formula $t_{0}=0,$
-\end_inset
-
- 
-\begin_inset Formula $t=[0,2\cdot10^{5},3\cdot10^{6}].$
-\end_inset
-
- We can observe the slow evolution of the propagated DFEs into what seems to be a gaussian.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\align left
-\begin_inset Float figure
-placement document
-alignment document
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_1000001.png
-	lyxscale 40
-	scale 40
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_1500001.png
-	lyxscale 40
-	scale 40
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /Users/yotamlif/Desktop/Spin_Glass_Evolution/dfe_tracker_plots_lenski_data_10-6/replicate0/strain_lineage_0/dfe_day_4000001.png
-	lyxscale 40
-	scale 40
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:t_0=1000001"
-
-\end_inset
-
- Forward and backward propagations for 
-\begin_inset Formula $t_{0}=1+10^{6},$
-\end_inset
-
- 
-\begin_inset Formula $t=[1+10^{6},1+15\cdot10^{5},1+4\cdot10^{6}].$
-\end_inset
-
- Timescale is larger because of diminishing magnitude of fixated fitness effects,
- leading to larger fixation times.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-So,
- it seems the value of 
-\begin_inset Formula $t_{0}$
-\end_inset
-
- doesn't change this effect.
- We shall immediately attempt to analyze this effect,
- but beforehand we must state the obvious - It must be that this Gaussian is a transitionary effect,
- and such is the one observed in Bayms paper as well.
- I say this because it is obvious that the BDFE loses its meaning/nature when we approach a local fitness peak and there are almost no beneficial distribution effects left.
- Thus,
- we must think of this creature in the right regimes of existence.
- Now,
- to analyze:
+ Now:
 \end_layout
 
 \begin_layout Standard
@@ -506,27 +309,6 @@ So,
 
 \begin_layout Standard
 \align left
-Define 
-\begin_inset Formula $N_{+}(t)$
-\end_inset
-
- as the number of 
-\begin_inset Formula $\alpha_{i}=+1$
-\end_inset
-
- at time 
-\begin_inset Formula $t$
-\end_inset
-
- and 
-\begin_inset Formula $N_{-}(t)=L-N_{+}(t)$
-\end_inset
-
- the number of 
-\begin_inset Formula $\alpha_{i}=-1.$
-\end_inset
-
- 
 \begin_inset Formula $\Delta_{i}$
 \end_inset
 
@@ -551,7 +333,50 @@ conditioning on
 \end_inset
 
 .
- Observe that in general and regardless of time there exists a symmetry of 
+ 
+\end_layout
+
+\begin_layout Standard
+Define:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f_{i}=\sum_{j=1}^{L}J_{ij}\alpha_{j}:=\sum_{j=1}^{L}f_{ij}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+N_{+}^{i}:=\#f_{ij}>0
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+N_{-}^{i}=L-N_{+}^{i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align left
+Observe the following:
+\end_layout
+
+\begin_layout Enumerate
+\align left
+in general,
+ and regardless of time,
+ there exists a symmetry of 
 \begin_inset Formula $J_{ij},h_{i}$
 \end_inset
 
@@ -560,11 +385,7 @@ conditioning on
 \end_inset
 
 ,
- thus we assume 
-\begin_inset Formula $N_{+}(t)\approx N_{-}(t)$
-\end_inset
-
- ,
+ such that we assume that an identical number of positive and negative spins is the natural state of things,
  regardless of 
 \begin_inset Formula $t$
 \end_inset
@@ -579,112 +400,141 @@ conditioning on
 \end_inset
 
  ,
- and 
+ thus 
 \begin_inset Formula $+\rightarrow-$
 \end_inset
 
- as much as 
+ transitions happen as frequently as 
 \begin_inset Formula $-\rightarrow+$
 \end_inset
 
-.
- But,
- when we condition on 
+ transitions
+\end_layout
+
+\begin_layout Enumerate
+By conditioning on 
+\begin_inset Formula $i$
+\end_inset
+
+ s.t.
+ 
 \begin_inset Formula $\Delta_{i}>0$
 \end_inset
 
- we choose the 
+,
+ we just choose the 
 \begin_inset Formula $i$
 \end_inset
 
- s.t their 
+'s that,
+ maybe by chance,
+ have 
+\begin_inset Formula $sign(\alpha_{i})\neq sign(f_{i})$
+\end_inset
+
+ and for the largest 
+\begin_inset Formula $\Delta_{i}$
+\end_inset
+
+,
+ 
+\begin_inset Formula $|f_{i}|\gg0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Item 
+\begin_inset Formula $2$
+\end_inset
+
+ seems strange,
+ as 
+\begin_inset Formula $J_{ij}$
+\end_inset
+
+ are symmetric around 
+\begin_inset Formula $0$
+\end_inset
+
+ and 
+\begin_inset Formula $\alpha_{i}$
+\end_inset
+
+ are 
+\begin_inset Quotes eld
+\end_inset
+
+random
+\begin_inset Quotes erd
+\end_inset
+
+ as far as 
 \begin_inset Formula $f_{i}$
 \end_inset
 
- are the ones that this symmetry is broken in a way that 
-\begin_inset Formula $f_{i}\neq0$
+ is concerned.
+ Random meaning that 
+\begin_inset Formula $f_{i}$
 \end_inset
 
- ,
- and in particular 
-\begin_inset Formula $sign(f_{i})\neq sign(\alpha_{i}).$
-\end_inset
-
- For example,
- if 
-\begin_inset Formula $\alpha_{i}<0$
-\end_inset
-
- and the fitness effect of gene 
-\begin_inset Formula $i$
-\end_inset
-
- is beneficial,
- this means 
-\begin_inset Formula $f_{i}=\sum_{j=1}^{L}J_{ij}\alpha_{j}>0$
-\end_inset
-
- ,
- and in particular,
- considering 
-\begin_inset Formula $N_{+}(t)\approx N_{-}(t)$
-\end_inset
-
- ,
- it must be that specifically for row 
-\begin_inset Formula $i$
-\end_inset
-
- we have and/or:
-\end_layout
-
-\begin_layout Enumerate
-\align left
-We have an untypical amount of 
-\begin_inset Formula $J_{ij}$
-\end_inset
-
- that have the same sign as 
-\begin_inset Formula $\alpha_{i}\alpha_{j}$
-\end_inset
-
-.
- Name this 
+ does not 
 \begin_inset Quotes eld
 \end_inset
 
-quantity skew
+know
 \begin_inset Quotes erd
 \end_inset
 
+ the sign of the rest of the 
+\begin_inset Formula $f_{j}$
+\end_inset
+
+ to which evolution drives 
+\begin_inset Formula $\alpha_{j}$
+\end_inset
+
+'s sign to be,
+ thus there should be no asymmetry of the 
+\begin_inset Formula $f_{ij}$
+\end_inset
+
+s around 
+\begin_inset Formula $0$
+\end_inset
+
+ in a general row 
+\begin_inset Formula $i$
+\end_inset
+
 .
- We will use the name later.
-\end_layout
-
-\begin_layout Enumerate
-\align left
-We have that 
-\begin_inset Formula $\alpha_{i}\alpha_{j}$
+ Yet,
+ by the conditioning of the 
+\begin_inset Formula $\Delta_{i}>0$
 \end_inset
 
- are the same sign as 
-\begin_inset Formula $J_{ij}$
+,
+ we are precisely choosing the 
+\begin_inset Formula $i$
 \end_inset
 
- for the largest values of 
-\begin_inset Formula $J_{ij}$
-\end_inset
-
-.
- Name this 
+'s in which this discrimination,
+ or 
 \begin_inset Quotes eld
 \end_inset
 
-quality skew
+skewness
 \begin_inset Quotes erd
 \end_inset
 
-.
+,
+ is present,
+ meaning 
+\begin_inset Formula $|N_{+}^{i}-N_{-}^{i}|>0$
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -693,45 +543,13 @@ Now we assume that evolving in time randomly flips
 \begin_inset Formula $\alpha_{j}$
 \end_inset
 
- ,
- at least as far as 
-\begin_inset Formula $f_{i}$
+.
+ This would randomly change the signs of 
+\begin_inset Formula $f_{ij}$
 \end_inset
 
- are concerned.
- For 
-\begin_inset Formula $f_{i}>0$
-\end_inset
-
- we had for the above example more terms of 
-\begin_inset Formula $J_{ij}\alpha_{j}>0$
-\end_inset
-
- than 
-\begin_inset Formula $J_{ij}\alpha_{j}<0$
-\end_inset
-
- .
- In this case,
- flipping random 
-\begin_inset Formula $\alpha_{j}$
-\end_inset
-
- more likely 
-\begin_inset Quotes eld
-\end_inset
-
-evens out
-\begin_inset Quotes erd
-\end_inset
-
- the sum,
- such that there roughly the same number of 
-\begin_inset Formula $J_{ij}\alpha_{j}>0$
-\end_inset
-
- as 
-\begin_inset Formula $J_{ij}\alpha_{j}<0$
+ and reduce the skewness such that 
+\begin_inset Formula $|N_{+}^{i}-N_{-}^{i}|\rightarrow0$
 \end_inset
 
 .
@@ -740,7 +558,7 @@ evens out
 \begin_inset Formula $L\rho$
 \end_inset
 
- and an unbiased sum:
+ and an un-skewed sum:
 \end_layout
 
 \begin_layout Standard
@@ -761,7 +579,7 @@ Where we assumed that for the now
 \begin_inset Quotes eld
 \end_inset
 
-unbiased
+un-skewed
 \begin_inset Quotes erd
 \end_inset
 
@@ -829,6 +647,21 @@ scrambling
 
  effect we observe in the simulation,
  and that which is observed in Bayms paper.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Nothing in this derivation is biased towards the BDFE though!
+
+\series default
+ If we just change our conditioning to the deleterious side,
+ and condition on 
+\begin_inset Formula $\Delta_{i}<0$
+\end_inset
+
+,
+ all the same statements(with flipped signs perhaps) hold.
 \end_layout
 
 \begin_layout Standard
