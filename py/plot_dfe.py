@@ -149,7 +149,7 @@ if __name__ == '__main__':
                     # Annotate the chi-squared value and lambda on the plot
                     plt.text(0.95, 0.5, f'Chi squared: {chi_squared_beneficial}', transform=plt.gca().transAxes,
                              verticalalignment='top', horizontalalignment='right')
-                    plt.text(0.95, 0.5, f'λ: {_lambda:.2f}', transform=plt.gca().transAxes,
+                    plt.text(0.95, 0.7, f'λ: {_lambda:.2f}', transform=plt.gca().transAxes,
                              verticalalignment='top', horizontalalignment='right')
 
                     plt.legend()
