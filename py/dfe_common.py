@@ -2,8 +2,6 @@ import os
 import struct
 import math
 import numpy as np
-from scipy.sparse import csr_array
-
 
 def read_bin_to_type(path, _type_bin, _type):
     """
@@ -305,9 +303,20 @@ def build_mut_series_t(mut_order_strain, mut_times_strain, t):
     Returns:
         list: The computed mutation series at time t.
     """
-    # Get index j of largest mutation time that is smaller than t
-    j = next((i for i, time in enumerate(mut_times_strain) if time >= t), len(mut_times_strain))
-    return mut_order_strain[:j]
+    # Initialize the index j to the length of the mutation times list
+    j = len(mut_times_strain)
+
+    # Iterate over the mutation times and find the first time that is greater than or equal to t
+    for i, time in enumerate(mut_times_strain):
+        if time >= t:
+            # Set j to the current index and break out of the loop
+            j = i
+            break
+
+    # Slice the mutation order up to the index j and return it
+    mutation_series_at_t = mut_order_strain[:j]
+    return mutation_series_at_t
+
 
 
 def build_alpha(alpha0, mut_series):

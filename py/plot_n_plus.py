@@ -80,16 +80,15 @@ def n_plus_value(alpha_t, Jij, rho, bdfe_t0_inds):
     # Build Delta_ij. Delta_i = Sum over j of Delta_ij is the fitness effect of mutation i
     # {Delta}_ij = -2 * alpha_i * alpha_j * J_ij
     # Rows are not zero only for beneficial mutations, but columns are not zero for all mutations
-    Dij = np.outer(-1 * reduced_alpha_t, alpha_t) * reduced_Jij
+    Dij = np.outer(reduced_alpha_t, alpha_t) * reduced_Jij
     L_ben = len(bdfe_t0_inds)
     L = len(alpha_t)
     # Count the number of positive elements in each row, should be about half of the non-zero elements.
     # We care about the deviation from this half value.
     vec = np.sum(Dij > 0, axis=1)
-    max = np.max(vec)
     vec = vec / (L * rho) - 0.5
     # Average over all *beneficial* genes, notice the L and not the true length of the vector
-    return sum(vec) / L_ben, max
+    return sum(vec) / L_ben, np.max(np.abs(vec))
 
 
 if __name__ == '__main__':
@@ -186,7 +185,7 @@ if __name__ == '__main__':
             # Second subplot: Max n_plus for flipped alpha values
             ax2.plot(times[1:], [x[1] for x in n_plus_flipped_values][1:], 'go-', label='Max')
             ax2.set_xlabel('t')
-            ax2.set_ylabel(r'$\max(N_+)$')
+            ax2.set_ylabel(r'$\max(|N_+ / \rho L - \frac{1}{2}|)$')
             ax2.set_title(f'Strain {strain} ; Replicate {i} (Flipped - Max), $t_0 = {args.init_day}$, $t_f = {args.final_day}$')
             ax2.grid(True)
 
@@ -208,7 +207,7 @@ if __name__ == '__main__':
             # Second subplot: Max n_plus for non-flipped alpha values
             ax4.plot(times, [x[1] for x in n_plus_non_flipped_values], 'go-', label='Max')
             ax4.set_xlabel('t')
-            ax4.set_ylabel(r'$\max(N_+)$')
+            ax4.set_ylabel(r'$\max(|N_+ / \rho L - \frac{1}{2}|)$')
             ax4.set_title(f'Strain {strain} ; Replicate {i} (Non-Flipped - Max), $t_0 = {args.init_day}$, $t_f = {args.final_day}$')
             ax4.grid(True)
 
@@ -230,7 +229,7 @@ if __name__ == '__main__':
             # Second subplot: mean_lf_value over time
             ax6.plot(times, mean_lf_values, 'mo-')
             ax6.set_xlabel('t')
-            ax6.set_ylabel('Mean LF Value')
+            ax6.set_ylabel(r'$\langle |f_i| \rangle$')
             ax6.set_title(f'Strain {strain} ; Replicate {i}, Mean LF, $t_0 = {args.init_day}$, $t_f = {args.final_day}$')
             ax6.grid(True)
 
