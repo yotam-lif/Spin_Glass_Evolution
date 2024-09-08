@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 from scipy.optimize import curve_fit
 import os
 
@@ -9,11 +10,6 @@ def exponent(x, _lambda):
 
 
 def build_Jijs(L, rho, sig_J):
-    """
-    :param L: Length of the genome
-    :param rho: Sparsity parameter
-    :return: Symmetric Jij matrix with zeros on the diagonal
-    """
     Jijs = np.zeros((L, L))
     for i in range(L):
         for j in range(i + 1, L):
@@ -25,80 +21,30 @@ def build_Jijs(L, rho, sig_J):
 
 
 def compute_fit_slow(alpha, his, Jijs, F_off=0.0):
-    """
-    :param alpha: The genome
-    :param his: The hi values
-    :param Jijs: The Jij values
-    :param F_off: The offset of the fitness
-    :return: The fitness of the genome alpha given the hi and Jij, via full slow computation.
-    """
     return alpha @ his + alpha @ Jijs @ alpha - F_off
 
 
-def compute_fitness_delta_mutant(alpha, hi, Jalpha, k):
-    """
-    Computes the change in fitness for a mutant at index k.
+def compute_fitness_delta_mutant(alpha, hi, f_i, k):
+    return -1 * alpha[k] * (hi[k] + 2 * f_i[k])
 
-    Args:
-        alpha (np.ndarray): The alpha vector.
-        hi (np.ndarray): The hi vector.
-        Jalpha (np.ndarray): The J*alpha vector.
-        k (int): The index of the mutant.
 
-    Returns:
-        float: The computed fitness delta.
-    """
-    return -2 * alpha[k] * (hi[k] + 2 * Jalpha[k])
+def compute_local_fields(alpha, Jijs):
+    return alpha @ Jijs
 
 
 def compute_DFE(alpha, hi, Jijs):
-    """
-    Computes the DFE for the given genome.
-
-    Args:
-        alpha (np.ndarray): The alpha vector.
-        hi (np.ndarray): The hi vector.
-        Jalpha (np.ndarray): The J*alpha vector.
-
-    Returns:
-        np.ndarray: The computed DFE.
-    """
-    Jalpha = Jijs @ alpha
+    f_i = compute_local_fields(alpha, Jijs)
     DFE = np.zeros(len(alpha))
     for k in range(len(alpha)):
-        DFE[k] = compute_fitness_delta_mutant(alpha, hi, Jalpha, k)
-    return DFE
+        DFE[k] = compute_fitness_delta_mutant(alpha, hi, f_i, k)
+    return DFE, 2 * f_i
 
 
 def clonal_lambda(s: float, alpha: float) -> float:
-    """
-    Computes the clonal lambda for the given s and alpha.
-
-    Args:
-        s (float): The fitness effect.
-        alpha (float): The alpha value.
-
-    Returns:
-        float: The computed clonal lambda.
-    """
     return (1 / s) * np.exp(-alpha * s) * (s + (1 / alpha))
 
 
 def choice_function(DFE: np.array, regime: int, alpha: float) -> np.array:
-    """
-    Computes the choice function for the given DFE and regime.
-
-    Args:
-        DFE (np.ndarray): The DFE.
-        regime (int): The regime; 0 is SSWM, 1 is CI.
-
-    Returns:
-        np.ndarray: The computed choice probabilities.
-    """
-    # If SSWM, the pre-factor does not matter is it is constant and factored out in the normalization
-    # All that matters is the probabilities are linear in s.
-    # If CI, we need to compute the full probability approximated in Lenski & Gerrish 1998.
-    # Also drop the constant pre-factors that are factored out in the normalization.
     if regime == 0:
         return DFE
     elif regime == 1:
@@ -111,12 +57,12 @@ def run_simulation(L, dir_path, rho, rank_final, sig_h, sig_J, regime, alpha_ci)
     alpha = np.random.choice([-1, 1], L)
     his = np.random.normal(0, sig_h, L)
     Jijs = build_Jijs(L, rho, sig_J)
-    init_fit = compute_fit_slow(alpha, his, Jijs)
-    F_off = init_fit - 1
 
     saved_DFEs = {}
+    saved_lfs = {}
     saved_ranks = {}
-    DFE = compute_DFE(alpha, his, Jijs)
+    zero_counts = {}
+    DFE, f_i = compute_DFE(alpha, his, Jijs)
     rank = len([x for x in DFE if x >= 0])
     mut = 0
 
@@ -135,11 +81,12 @@ def run_simulation(L, dir_path, rho, rank_final, sig_h, sig_J, regime, alpha_ci)
 
         chosen_index = np.random.choice(np.arange(L), p=choice_probs)
         alpha[chosen_index] *= -1
-        DFE = compute_DFE(alpha, his, Jijs)
+        DFE, f_i = compute_DFE(alpha, his, Jijs)
         rank = len([x for x in DFE if x >= 0])
 
         if mut % 100 == 0:
             saved_DFEs[mut] = DFE.copy()
+            saved_lfs[mut] = f_i.copy()
             saved_ranks[mut] = rank
             print(mut, rank)
 
@@ -147,6 +94,7 @@ def run_simulation(L, dir_path, rho, rank_final, sig_h, sig_J, regime, alpha_ci)
 
     mut -= 1
     saved_DFEs[mut] = DFE.copy()
+    saved_lfs[mut] = f_i.copy()
     saved_ranks[mut] = rank
     muts = np.append(np.arange(start=0, stop=mut, step=100), mut)
 
@@ -154,50 +102,64 @@ def run_simulation(L, dir_path, rho, rank_final, sig_h, sig_J, regime, alpha_ci)
         if mut in saved_DFEs:
             fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
-            counts, bins, _ = ax1.hist(saved_DFEs[mut], bins=50, density=True, alpha=0.6)
-            ax1.set_title(f'DFE Histogram at t={mut}, rank={saved_ranks[mut]}')
-            ax1.set_xlabel('Fitness effect')
-            ax1.set_ylabel('Frequency')
+            # Find the bin that contains 0 and count values in that bin
+            counts, bin_edges = np.histogram(saved_DFEs[mut], bins=50)
+            zero_bin_index = np.digitize(0, bin_edges) - 1  # Find the bin that contains 0
+            zero_bin_count = counts[zero_bin_index]  # Get the count of values in the bin containing 0
+            zero_counts[mut] = zero_bin_count
 
-            mean = float(np.mean(saved_DFEs[mut]))
-            ax1.axvline(mean, color='k', linestyle='dashed', linewidth=1)
-            max_index = np.argmax(counts)
-            max_value = float(bins[max_index])
-            ax1.axvline(max_value, color='r', linestyle='dashed', linewidth=1)
+            # Left plot: DFE and Local Fields histograms with KDE
+            sns.histplot(saved_DFEs[mut], bins=50, kde=True, ax=ax1, alpha=0.4, color='blue', label='DFE')
+            sns.histplot(saved_lfs[mut], bins=50, kde=True, ax=ax1, alpha=0.4, color='grey', label='Local Fields')
 
-            ax1.axvline(0, color='g', linestyle='dashed', linewidth=1)
-            ylim = ax1.get_ylim()
-            ax1.text(mean, ylim[1] * 0.8, f'Mean: {mean:.3f}', rotation=90, verticalalignment='bottom')
-            ax1.text(max_value, ylim[1] * 0.6, f'Max: {max_value:.3f}', rotation=90, verticalalignment='bottom')
+            # Plot vertical lines for means of DFE and Local Fields in the left plot
+            mean_DFE = np.mean(saved_DFEs[mut])
 
-            beneficial_data = [x for x in saved_DFEs[mut] if x >= 0]
-            if len(beneficial_data) > 0:
-                counts_ben, bins_ben, _ = ax2.hist(beneficial_data, bins=20, density=True, alpha=0.6, color='g')
-                ax2.set_title(f'Beneficial Tail at mut={mut}, rank={saved_ranks[mut]}')
-                ax2.set_xlabel('Fitness effect')
-                ax2.set_ylabel('Frequency')
+            ax1.axvline(mean_DFE, color='blue', linestyle='dashed', linewidth=1, label=f'DFE Mean: {mean_DFE:.3f}')
+            ax1.axvline(0, color='g', linestyle='dashed', linewidth=1, label='0')
 
-                bin_centers = (bins_ben[:-1] + bins_ben[1:]) / 2
-                params, _ = curve_fit(exponent, bin_centers, counts_ben, p0=[1])
-                fitted_data = exponent(bin_centers, *params)
-                ax2.plot(bin_centers, fitted_data, 'r--', label='Exponential Fit')
+            ax1.set_title(f'#mutations={mut}, rank={saved_ranks[mut]}')
+            ax1.set_xlabel('Fitness effect / Local Fields')
+            ax1.set_ylabel("Counts")
+            ax1.legend()
 
-                ax2.text(0.95, 0.90, f'λ: {params[0]:.2f}', transform=ax2.transAxes,
-                         verticalalignment='top', horizontalalignment='right')
+            # Right plot: DFE and Absolute Local Fields histograms with KDE (peach color for abs local fields)
+            abs_local_fields = -1 * np.abs(saved_lfs[mut])
+            sns.histplot(saved_DFEs[mut], bins=50, stat="density", ax=ax2, alpha=0.4, color='blue', label='DFE')
+            sns.histplot(abs_local_fields, bins=50, stat="density", ax=ax2, alpha=0.4, color='grey', label='-|LFs|')
+
+            # Plot vertical lines for means of DFE and Abs Local Fields in the right plot
+            mean_abs_lf = np.mean(abs_local_fields)
+            ax2.axvline(mean_DFE, color='blue', linestyle='dashed', linewidth=1, label=f'DFE Mean: {mean_DFE:.3f}')
+            ax2.axvline(mean_abs_lf, color='grey', linestyle='dashed', linewidth=1, label=f'-|LF| Mean: {mean_abs_lf:.3f}')
+            ax2.axvline(0, color='g', linestyle='dashed', linewidth=1, label='0')
+
+            ax2.set_title(f'#mutations={mut}, rank={saved_ranks[mut]}')
+            ax2.set_xlabel('Fitness effect / Local Fields')
+            ax1.set_ylabel("Density")
+            ax2.legend()
 
             plt.tight_layout()
-            plt.savefig(f'{dir_path}/dfe_hist_mut_{mut}.png')
+            plt.savefig(f'{dir_path}/dfe_hist_mut_{mut}.png', dpi=300)
             plt.close()
+
+    # Plot the zero counts
+    fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+    ax.plot(list(zero_counts.keys()), list(zero_counts.values()))
+    ax.set_xlabel('#Mutations')
+    ax.set_ylabel('P(h=0)')
+    plt.savefig(f'{dir_path}/zero_counts.png', dpi=300)
+    plt.close()
 
 
 # Example usage
 L = 4000  # Length of the genome
 rho = 0.05  # Sparsity parameter
 delta = 0.01
-beta = 0.75
+beta = 1.0
 rank_final = 1  # Rank to reach before stopping the simulation
 dir_name = "sim_dfe_epi_plots"
-regime = 1  # 0 is SSWM, 1 is CI
+regime = 0  # 0 is SSWM, 1 is CI
 alpha = 1
 
 sig_h = np.sqrt(1 - beta) * delta
