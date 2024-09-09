@@ -458,3 +458,5 @@ def compute_rank(alpha: np.ndarray, hi: np.ndarray, Jij: np.ndarray):
         if delta_i > 0:
             rank += 1
     return rank
+
+

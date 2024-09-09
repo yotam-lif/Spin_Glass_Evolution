@@ -53,7 +53,7 @@ def choice_function(DFE: np.array, regime: int, alpha: float) -> np.array:
         raise ValueError(f"Invalid regime: {regime}")
 
 
-def run_simulation(L, dir_path, rho, rank_final, sig_h, sig_J, regime, alpha_ci):
+def run_simulation(L, dir_path, rho, rank_final, sig_h, sig_J, regime, alpha_ci, epsilon):
     alpha = np.random.choice([-1, 1], L)
     his = np.random.normal(0, sig_h, L)
     Jijs = build_Jijs(L, rho, sig_J)
@@ -143,11 +143,44 @@ def run_simulation(L, dir_path, rho, rank_final, sig_h, sig_J, regime, alpha_ci)
             plt.savefig(f'{dir_path}/dfe_hist_mut_{mut}.png', dpi=300)
             plt.close()
 
-    # Plot the zero counts
+    # Plot the zero counts using Seaborn with a regression line
     fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-    ax.plot(list(zero_counts.keys()), list(zero_counts.values()))
+
+    # Prepare data for plotting
+    mutations = np.array(list(zero_counts.keys()))
+    zero_values = np.array(list(zero_counts.values()))
+
+    # Use Seaborn regplot to create a scatter plot with a linear fit line
+    scatter = sns.regplot(x=mutations, y=zero_values, ax=ax, marker='o', color='blue', line_kws={"color": "red"})
+
+    # Fit a linear model to extract the slope and intercept
+    slope, intercept = np.polyfit(mutations, zero_values, 1)
+
+    # Calculate predicted values from the linear model
+    predicted_values = slope * mutations + intercept
+
+    # Calculate chi-squared: sum of ((observed - predicted)^2) / variance
+    # Assuming variance of 1 for each point if not provided
+    chi_squared = np.sum(((zero_values - predicted_values) ** 2) / 1)
+
+    # Add text to the graph as part of the legend
+    scatter_label = f'Slope: {slope:.3f}\nChi-squared: {int(chi_squared)}'
+
+    # Adding custom legend manually
+    handles, labels = ax.get_legend_handles_labels()
+    handles.append(plt.Line2D([0], [0], color='red', lw=2, label='Linear Fit'))
+    handles.append(plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='blue', markersize=10, label='Scatter Plot'))
+    handles.append(plt.Line2D([0], [0], color='none', label=scatter_label))
+
+    # Set legend with scatter plot, linear fit, slope, and chi-squared
+    ax.legend(handles=handles, loc='upper right', fontsize=10)
+
+    # Set labels and save the plot
     ax.set_xlabel('#Mutations')
     ax.set_ylabel('P(h=0)')
+    ax.set_title('Zero Counts vs Mutations')
+
+    plt.tight_layout()
     plt.savefig(f'{dir_path}/zero_counts.png', dpi=300)
     plt.close()
 
@@ -161,6 +194,7 @@ rank_final = 1  # Rank to reach before stopping the simulation
 dir_name = "sim_dfe_epi_plots"
 regime = 0  # 0 is SSWM, 1 is CI
 alpha = 1
+epsilon = 0.1
 
 sig_h = np.sqrt(1 - beta) * delta
 sig_J = np.sqrt(beta) * delta / np.sqrt(L * rho) / 2
@@ -169,4 +203,4 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 dir_path = os.path.join(base_dir, dir_name)
 os.makedirs(dir_path, exist_ok=True)
 
-run_simulation(L, dir_path, rho, rank_final, sig_h, sig_J, regime, alpha)
+run_simulation(L, dir_path, rho, rank_final, sig_h, sig_J, regime, alpha, epsilon)
