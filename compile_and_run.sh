@@ -10,7 +10,7 @@ module load GSL/2.7-GCC-12.3.0 >> out_$LSB_JOBID.txt 2>> err_$LSB_JOBID.txt
 echo "Setting environment variables..." >> out_$LSB_JOBID.txt 2>> err_$LSB_JOBID.txt
 export BOOST_INCLUDE=/apps/easybd/easybuild/software/Boost/1.82.0-GCC-12.3.0/include
 export BOOST_LIB=/apps/easybd/easybuild/software/Boost/1.82.0-GCC-12.3.0/lib
-export GSL_INCLUDE=/apps/easybd/easybuild/software/GSL/2.7-GCC-12.3.0/include
+export GSL_INC LUDE=/apps/easybd/easybuild/software/GSL/2.7-GCC-12.3.0/include
 export GSL_LIB=/apps/easybd/easybuild/software/GSL/2.7-GCC-12.3.0/lib
 export LD_LIBRARY_PATH=$GSL_LIB:$BOOST_LIB:$LD_LIBRARY_PATH
 
